@@ -1,9 +1,13 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Tài khoản</title><link rel="stylesheet" href="styles.css?v=1"></head>
 <body class="center-page"><a class="brand floating" href="index.html"><span class="logo">↗</span>Lynkora</a>
-<div class="auth-shell"><div class="tabs"><button id="loginTab" class="active">Đăng nhập</button><button id="registerTab">Đăng ký</button></div>
+<div class="auth-shell"><div class="tabs" id="authTabs"><button id="loginTab" class="active">Đăng nhập</button><button id="registerTab">Đăng ký</button></div>
 <form id="authForm" class="panel"><h1 id="authTitle">Chào mừng trở lại</h1><p class="muted" id="authHint">Đăng nhập để quản lý link của bạn.</p>
-<label>Email<input id="email" type="email" autocomplete="email" required placeholder="ban@email.com"></label>
-<label>Mật khẩu<input id="password" type="password" minlength="6" required placeholder="Tối thiểu 6 ký tự"></label>
+<label id="emailWrap">Email<input id="email" type="email" autocomplete="email" required placeholder="ban@email.com"></label>
+<label id="passwordWrap">Mật khẩu<input id="password" type="password" minlength="6" required placeholder="Tối thiểu 6 ký tự"></label>
+<label id="confirmPasswordWrap" class="hidden">Nhập lại mật khẩu<input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới"></label>
 <label id="nameWrap" class="hidden">Tên hiển thị<input id="displayName" maxlength="40" placeholder="Tên của bạn"></label>
-<button class="primary full" type="submit" id="submitBtn">Đăng nhập</button><div id="msg" class="msg"></div></form></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=2"></script><script src="app.js?v=1"></script></body></html>
+<button class="primary full" type="submit" id="submitBtn">Đăng nhập</button>
+<button class="ghost full" type="button" id="forgotPasswordBtn" style="margin-top:10px">Quên mật khẩu?</button>
+<button class="ghost full hidden" type="button" id="backToLoginBtn" style="margin-top:10px">← Quay lại đăng nhập</button>
+<div id="msg" class="msg"></div></form></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=2"></script><script src="app.js?v=22"></script></body></html>

@@ -60,17 +60,81 @@
 
   if ($("authForm")) {
     let mode = location.hash === "#register" ? "register" : "login";
-    const paint = () => {
-      $("loginTab").classList.toggle("active", mode==="login");
-      $("registerTab").classList.toggle("active", mode==="register");
-      $("nameWrap").classList.toggle("hidden", mode!=="register");
-      $("authTitle").textContent = mode==="login" ? "Chào mừng trở lại" : "Tạo tài khoản";
-      $("authHint").textContent = mode==="login" ? "Đăng nhập để quản lý link của bạn." : "Bắt đầu tạo và theo dõi link.";
-      $("submitBtn").textContent = mode==="login" ? "Đăng nhập" : "Đăng ký";
+
+    const setRequired=(id,required)=>{
+      const el=$(id);
+      if(el) el.required=required;
     };
-    $("loginTab").onclick=()=>{mode="login";history.replaceState(null,"",location.pathname);paint()};
-    $("registerTab").onclick=()=>{mode="register";history.replaceState(null,"","#register");paint()};
+
+    const paint = () => {
+      const isLogin=mode==="login";
+      const isRegister=mode==="register";
+      const isForgot=mode==="forgot";
+      const isReset=mode==="reset";
+
+      $("authTabs")?.classList.toggle("hidden", isForgot || isReset);
+      $("loginTab")?.classList.toggle("active", isLogin);
+      $("registerTab")?.classList.toggle("active", isRegister);
+      $("nameWrap")?.classList.toggle("hidden", !isRegister);
+      $("emailWrap")?.classList.toggle("hidden", isReset);
+      $("passwordWrap")?.classList.toggle("hidden", isForgot);
+      $("confirmPasswordWrap")?.classList.toggle("hidden", !isReset);
+      $("forgotPasswordBtn")?.classList.toggle("hidden", !isLogin);
+      $("backToLoginBtn")?.classList.toggle("hidden", !(isForgot || isReset));
+
+      setRequired("email", !isReset);
+      setRequired("password", !isForgot);
+      setRequired("confirmPassword", isReset);
+
+      if(isLogin){
+        $("authTitle").textContent="Chào mừng trở lại";
+        $("authHint").textContent="Đăng nhập để quản lý link của bạn.";
+        $("submitBtn").textContent="Đăng nhập";
+        $("password").minLength=6;
+        $("password").placeholder="Tối thiểu 6 ký tự";
+        $("password").autocomplete="current-password";
+      } else if(isRegister){
+        $("authTitle").textContent="Tạo tài khoản";
+        $("authHint").textContent="Bắt đầu tạo và theo dõi link.";
+        $("submitBtn").textContent="Đăng ký";
+        $("password").minLength=6;
+        $("password").placeholder="Tối thiểu 6 ký tự";
+        $("password").autocomplete="new-password";
+      } else if(isForgot){
+        $("authTitle").textContent="Quên mật khẩu";
+        $("authHint").textContent="Nhập email tài khoản. Lynkora sẽ gửi cho bạn liên kết đặt lại mật khẩu.";
+        $("submitBtn").textContent="Gửi link đặt lại mật khẩu";
+      } else {
+        $("authTitle").textContent="Đặt mật khẩu mới";
+        $("authHint").textContent="Nhập mật khẩu mới cho tài khoản Lynkora của bạn.";
+        $("submitBtn").textContent="Lưu mật khẩu mới";
+        $("password").minLength=8;
+        $("password").placeholder="Ít nhất 8 ký tự";
+        $("password").autocomplete="new-password";
+      }
+    };
+
+    $("loginTab").onclick=()=>{mode="login";history.replaceState(null,"",location.pathname);$("msg").textContent="";paint()};
+    $("registerTab").onclick=()=>{mode="register";history.replaceState(null,"","#register");$("msg").textContent="";paint()};
+    $("forgotPasswordBtn").onclick=()=>{mode="forgot";history.replaceState(null,"","#forgot");$("msg").textContent="";paint()};
+    $("backToLoginBtn").onclick=()=>{mode="login";history.replaceState(null,"",location.pathname);$("msg").textContent="";paint()};
+
+    if(location.hash==="#forgot") mode="forgot";
+    if(location.hash==="#reset") mode="reset";
+
+    if(sb){
+      sb.auth.onAuthStateChange((event)=>{
+        if(event==="PASSWORD_RECOVERY"){
+          mode="reset";
+          history.replaceState(null,"","#reset");
+          $("msg").textContent="Link xác minh hợp lệ. Hãy đặt mật khẩu mới.";
+          paint();
+        }
+      });
+    }
+
     paint();
+
     $("authForm").onsubmit = async e => {
       e.preventDefault(); $("msg").textContent="";
       if (!sb) return $("msg").textContent="Hãy cấu hình Supabase trong config.js trước.";
@@ -82,6 +146,25 @@
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
           if(data.session) location.href="dashboard.html?v=19";
+        } else if(mode==="forgot") {
+          if(!email) throw new Error("Hãy nhập email tài khoản của bạn.");
+          const redirectTo=`${location.origin}${location.pathname}#reset`;
+          const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+          if(error) throw error;
+          $("msg").textContent="Đã gửi link đặt lại mật khẩu. Hãy kiểm tra hộp thư email (kể cả Spam/Thư rác).";
+        } else if(mode==="reset") {
+          const confirmPass=$("confirmPassword").value;
+          if(password.length<8) throw new Error("Mật khẩu mới cần ít nhất 8 ký tự.");
+          if(password!==confirmPass) throw new Error("Hai mật khẩu chưa khớp.");
+          const {error}=await sb.auth.updateUser({password});
+          if(error) throw error;
+          $("msg").textContent="Đổi mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.";
+          $("authForm").reset();
+          setTimeout(()=>{
+            mode="login";
+            history.replaceState(null,"",location.pathname);
+            paint();
+          },1200);
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
           if(error) throw error; location.href="dashboard.html?v=19";
