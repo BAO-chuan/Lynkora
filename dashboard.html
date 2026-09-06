@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=9"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=10"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=3">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
 <main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=3">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=3">Admin</a></aside>
-<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.7</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.8</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel revenue-panel wallet-panel"><div class="row-between"><div><span class="eyebrow">WALLET • INTERNAL</span><h2>Số dư nội bộ</h2><p class="muted compact">Số dư được ghi cố định khi một lượt truy cập trở thành hợp lệ. Đây là số dư nội bộ của Lynkora, chưa hỗ trợ rút tiền thật.</p></div><div class="revenue-number"><small>Số dư hiện tại</small><b id="walletBalance">0 ₫</b><span id="publisherCpm">CPM 0 ₫</span></div></div><div class="wallet-mini"><span><small>Lượt đã ghi doanh thu</small><b id="walletEarnedVisits">0</b></span><span><small>Đã ghi nhận</small><b id="walletLifetime">0 ₫</b></span></div></div>
@@ -10,6 +10,19 @@
   <div class="row-between"><div><span class="eyebrow">EARNINGS HISTORY</span><h2>Lịch sử phát sinh doanh thu</h2><p class="muted compact">Tối đa 50 lượt hợp lệ gần nhất đã được ghi vào số dư.</p></div><span id="earningsCount" class="pill">0 mục</span></div>
   <div class="table-scroll desktop-only"><table><thead><tr><th>Thời gian</th><th>Mã link</th><th>CPM</th><th>Phát sinh</th></tr></thead><tbody id="earningsBody"><tr><td colspan="4">Đang tải...</td></tr></tbody></table></div>
   <div id="earningsCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
+</div>
+
+<div class="panel" id="withdrawals">
+  <div class="row-between"><div><span class="eyebrow">WITHDRAWAL REQUESTS</span><h2>Yêu cầu rút số dư</h2><p class="muted compact">Tạo yêu cầu để Admin xem xét thủ công. v1.8 chưa tự động chuyển tiền.</p></div><span id="withdrawAvailable" class="pill">Khả dụng 0 ₫</span></div>
+  <form id="withdrawForm" class="withdraw-form">
+    <label>Số tiền (VND)<input id="withdrawAmount" type="number" min="1000" step="1000" required placeholder="Ví dụ: 50000"></label>
+    <label>Ghi chú / thông tin nhận tiền<input id="withdrawNote" type="text" maxlength="300" placeholder="Ví dụ: thông tin thanh toán để Admin đối soát"></label>
+    <button class="primary" type="submit">Gửi yêu cầu</button>
+  </form>
+  <div id="withdrawMsg" class="msg"></div>
+  <h3>Lịch sử yêu cầu</h3>
+  <div class="table-scroll desktop-only"><table><thead><tr><th>Thời gian</th><th>Số tiền</th><th>Trạng thái</th><th>Ghi chú Admin</th></tr></thead><tbody id="withdrawBody"><tr><td colspan="4">Đang tải...</td></tr></tbody></table></div>
+  <div id="withdrawCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
 </div>
 
 <div class="panel" id="analytics">
@@ -22,4 +35,4 @@
 
 <div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=9"></script><script src="app.js?v=9"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=10"></script><script src="app.js?v=10"></script></body></html>

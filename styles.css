@@ -100,3 +100,10 @@
 @media(max-width:700px){
   .wallet-mini,.wallet-admin-summary{grid-template-columns:1fr}
 }
+
+/* Lynkora v1.8 — withdrawal requests */
+.withdraw-form{display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:end;margin:16px 0}
+.withdraw-form label{display:grid;gap:6px}
+.withdraw-form input{width:100%}
+.inline-actions{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:700px){.withdraw-form{grid-template-columns:1fr}.inline-actions{margin-top:8px}}

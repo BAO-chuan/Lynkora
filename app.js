@@ -19,6 +19,9 @@
     too_fast: "Quá nhanh",
     expired: "Hết hạn"
   })[reason] || reason || "Khác";
+  const withdrawalStatusLabel = status => ({
+    pending:"Chờ duyệt", approved:"Đã duyệt", rejected:"Từ chối"
+  })[status] || status || "—";
   const clientKey = () => {
     let k=localStorage.getItem("lynkora_client_key");
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
@@ -75,10 +78,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=9";
+          if(data.session) location.href="dashboard.html?v=10";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=9";
+          if(error) throw error; location.href="dashboard.html?v=10";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -266,17 +269,18 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=9";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=10";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
       sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
       sb.rpc("lynkora_admin_wallet_summary"),
       sb.rpc("lynkora_admin_user_balances"),
-      sb.rpc("lynkora_admin_fraud_logs",{p_limit:100})
+      sb.rpc("lynkora_admin_fraud_logs",{p_limit:100}),
+      sb.rpc("lynkora_admin_withdrawals",{p_limit:100})
     ]);
-    if(se||ue||le||de||we||be||fe){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe);return}
+    if(se||ue||le||de||we||be||fe||wde){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe||wde);return}
     $("admUsers").textContent=stats?.users_count??0;
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
@@ -307,6 +311,21 @@
     const linkRows=(links||[]);
     $("adminLinksBody").innerHTML=linkRows.map(x=>`<tr data-id="${esc(x.link_id)}"><td><b>${esc(x.code)}</b></td><td>${esc(x.owner_email)}</td><td class="url-cell">${esc(x.target_url)}</td><td><span class="status ${x.is_active?"on":"off"}">${x.is_active?"Bật":"Tắt"}</span></td><td>${Number(x.click_count||0)}</td><td>${Number(x.valid_click_count||0)}</td><td><div class="table-actions"><button class="ghost tiny" data-admin-action="toggle" data-active="${x.is_active?'1':'0'}">${x.is_active?'Tắt':'Bật'}</button><button class="danger tiny" data-admin-action="delete">Xóa</button></div></td></tr>`).join("")||'<tr><td colspan="7">Chưa có link.</td></tr>';
     $("adminLinksCards").innerHTML=linkRows.map(adminLinkCard).join("")||'<p class="muted">Chưa có link.</p>';
+
+    const withdrawalRows=withdrawals||[];
+    const pendingCount=withdrawalRows.filter(x=>x.status==="pending").length;
+    if($("withdrawPendingPill")) $("withdrawPendingPill").textContent=`${pendingCount} chờ duyệt`;
+    const withdrawalActions=x=>x.status==="pending"?`<div class="inline-actions"><button class="small primary wd-action" data-id="${x.id}" data-action="approved">Duyệt</button><button class="small danger wd-action" data-id="${x.id}" data-action="rejected">Từ chối</button></div>`:"—";
+    if($("withdrawAdminBody")) $("withdrawAdminBody").innerHTML=withdrawalRows.map(x=>`<tr>
+      <td>${fmtDate(x.created_at)}</td><td>${esc(x.email||"—")}</td><td><b>${fmtVnd(x.amount_vnd)}</b></td>
+      <td><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span></td>
+      <td>${esc(x.note||"—")}</td><td>${withdrawalActions(x)}</td>
+    </tr>`).join("")||'<tr><td colspan="6">Chưa có yêu cầu rút.</td></tr>';
+    if($("withdrawAdminCards")) $("withdrawAdminCards").innerHTML=withdrawalRows.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap"><div><b>${esc(x.email||"—")}</b><small>${fmtDate(x.created_at)}</small></div><b>${fmtVnd(x.amount_vnd)}</b></div>
+      <div class="row-between gap"><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span>${withdrawalActions(x)}</div>
+      <small>${esc(x.note||"Không có ghi chú")}</small>
+    </article>`).join("")||'<p class="muted">Chưa có yêu cầu rút.</p>';
 
     const fraudRows=(fraud||[]);
     const reasonCounts={rapid_repeat:0,too_fast:0,expired:0,other:0};
