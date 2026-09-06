@@ -133,3 +133,21 @@
 @media(max-width:520px){
   .wallet-mini-v110,.wallet-admin-v110{grid-template-columns:1fr}
 }
+
+
+/* Lynkora v1.11 — per-link analytics */
+.link-analytics-head{gap:18px}
+.analytics-target{display:block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.link-detail-chart{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.link-detail-chart h3{margin:0 0 4px}
+.analytics-select{min-width:150px;padding:10px 12px;border-radius:9px;border:1px solid #263b58;background:#071321;color:#fff;outline:none}
+.analytics-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #168cff1d}
+.link-daily-revenue{display:flex;justify-content:flex-end;margin-top:12px}
+.link-daily-revenue span{display:flex;align-items:center;gap:10px;background:#081421;border:1px solid #1c2c43;border-radius:10px;padding:10px 13px}
+.link-daily-revenue small{color:var(--muted)}
+.link-analytics-metrics{grid-template-columns:repeat(4,1fr);margin:12px 0}
+@media(max-width:700px){
+  .link-analytics-head,.link-detail-chart .row-between{align-items:flex-start;gap:12px;flex-direction:column}
+  .analytics-select{width:100%}
+  .link-analytics-metrics{grid-template-columns:1fr 1fr}
+}

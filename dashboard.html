@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=12"></head>
-<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=12">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=12">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=12">Admin</a></aside>
-<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.10</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=13"></head>
+<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=13">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
+<main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=13">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=13">Admin</a></aside>
+<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.11</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel revenue-panel wallet-panel"><div class="row-between"><div><span class="eyebrow">WALLET • v1.10</span><h2>Ví Publisher</h2><p class="muted compact">Số dư khả dụng đã trừ các yêu cầu đang chờ và các yêu cầu đã được Admin duyệt. Yêu cầu bị từ chối không làm giảm số dư.</p></div><div class="revenue-number"><small>Số dư khả dụng</small><b id="walletBalance">0 ₫</b><span id="publisherCpm">CPM 0 ₫</span></div></div><div class="wallet-mini wallet-mini-v110"><span><small>Tổng thu nhập</small><b id="walletLifetime">0 ₫</b></span><span><small>Đang chờ rút</small><b id="walletPending">0 ₫</b></span><span><small>Đã duyệt rút</small><b id="walletApproved">0 ₫</b></span><span><small>Lượt ghi doanh thu</small><b id="walletEarnedVisits">0</b></span></div></div>
@@ -52,8 +52,44 @@
   <div class="chart-legend"><span><i class="legend-dot opens"></i>Lượt mở</span><span><i class="legend-dot valid"></i>Hợp lệ</span></div>
 </div>
 
+
+<div class="panel link-analytics-panel" id="linkAnalytics">
+  <div class="row-between link-analytics-head">
+    <div>
+      <span class="eyebrow">LINK ANALYTICS • v1.11</span>
+      <h2>Hiệu suất từng link</h2>
+      <p class="muted compact">So sánh lượt mở, hợp lệ, không hợp lệ, tỷ lệ hợp lệ và doanh thu đã ghi của từng link.</p>
+    </div>
+    <span id="linkAnalyticsCount" class="pill">0 link</span>
+  </div>
+
+  <div class="table-scroll desktop-only">
+    <table>
+      <thead><tr><th>Mã link</th><th>Lượt mở</th><th>Hợp lệ</th><th>Không hợp lệ</th><th>Tỷ lệ</th><th>Doanh thu</th><th></th></tr></thead>
+      <tbody id="linkAnalyticsBody"><tr><td colspan="7">Đang tải...</td></tr></tbody>
+    </table>
+  </div>
+  <div id="linkAnalyticsCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
+
+  <div class="link-detail-chart">
+    <div class="row-between">
+      <div>
+        <h3 id="linkDetailTitle">Biểu đồ 7 ngày</h3>
+        <p id="linkDetailSubtitle" class="muted compact">Chọn một link để xem chi tiết.</p>
+      </div>
+      <select id="linkAnalyticsSelect" class="analytics-select" aria-label="Chọn link"></select>
+    </div>
+    <div id="linkDailyChart" class="daily-chart"><p class="muted">Chưa chọn link.</p></div>
+    <div class="chart-legend">
+      <span><i class="legend-dot opens"></i>Lượt mở</span>
+      <span><i class="legend-dot valid"></i>Hợp lệ</span>
+    </div>
+    <div id="linkDailyRevenue" class="link-daily-revenue"></div>
+  </div>
+</div>
+
 <div class="panel" id="create"><h2>Tạo link mới</h2><form id="shortenForm" class="shorten"><input id="targetUrl" type="url" required placeholder="https://example.com/..."><button class="primary" type="submit">Rút gọn</button></form><div id="createMsg" class="msg"></div></div>
 
 <div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=12"></script><script src="app.js?v=12"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=13"></script><script src="app.js?v=13"></script></body></html>

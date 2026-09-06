@@ -1,39 +1,34 @@
-LYNKORA v1.10 — WALLET BALANCE CHUẨN
+LYNKORA v1.11 — LINK ANALYTICS
 
-MỤC TIÊU
-- Tách Tổng thu nhập / Đang chờ rút / Đã duyệt / Khả dụng.
-- Khả dụng = Tổng thu nhập - Pending - Approved.
-- Rejected không làm giảm số dư.
-- Không thay đổi earnings đã ghi.
-- Không thay đổi payout profile.
-- Không cần redeploy Edge Functions.
+TÍNH NĂNG
+- Thống kê riêng từng link:
+  + lượt mở
+  + lượt hợp lệ
+  + lượt không hợp lệ
+  + tỷ lệ hợp lệ
+  + doanh thu đã ghi
+- Chọn từng link để xem biểu đồ 7 ngày.
+- Biểu đồ chi tiết hiển thị lượt mở / hợp lệ và tổng doanh thu 7 ngày.
+- Không đổi Edge Functions.
+- Không đổi wallet, payout profile hay withdrawal logic.
 
 CÀI ĐẶT
-1) Supabase > SQL Editor > New query.
-2) Chạy toàn bộ Lynkora-v1.10.sql SAU v1.9.
-3) Nếu báo Success, lên GitHub ghi đè 4 file:
+1. Supabase > SQL Editor > New query.
+2. Chạy toàn bộ Lynkora-v1.11.sql SAU v1.10.
+3. GitHub ghi đè 4 file:
    - dashboard.html
    - admin.html
    - app.js
    - styles.css
-4) config.js KHÔNG CẦN thay.
-5) Trong go.html đổi cache app.js thành:
-   <script src="app.js?v=12"></script>
-6) Mở:
-   dashboard.html?v=12
-   admin.html?v=12
+4. config.js KHÔNG CẦN thay.
+5. go.html đổi cache:
+   <script src="app.js?v=13"></script>
+6. Mở thử:
+   dashboard.html?v=13
+   admin.html?v=13
 
 KIỂM TRA
-- Dashboard:
-  Tổng thu nhập = tổng earnings.
-  Pending = tổng yêu cầu pending.
-  Approved = tổng yêu cầu approved.
-  Khả dụng = Tổng thu nhập - Pending - Approved.
-- Admin:
-  Tổng hệ thống và từng Publisher dùng cùng công thức.
-- Khi từ chối một yêu cầu pending, số tiền đó phải trở lại Khả dụng.
-- Khi duyệt pending, tiền chuyển từ Pending sang Approved nên Khả dụng không đổi tại thời điểm duyệt.
-
-LƯU Ý
-- Đây vẫn là workflow nội bộ/thủ công, không tự động chuyển tiền.
-- Không lưu mật khẩu/PIN/OTP.
+- Dashboard có panel "Hiệu suất từng link".
+- Mỗi link hiện Opens / Valid / Invalid / Valid rate / Revenue.
+- Chọn link khác trong ô chọn hoặc bấm "7 ngày" để đổi biểu đồ.
+- Nút Làm mới cập nhật cả analytics.

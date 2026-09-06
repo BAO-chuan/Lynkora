@@ -81,10 +81,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=12";
+          if(data.session) location.href="dashboard.html?v=13";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=12";
+          if(error) throw error; location.href="dashboard.html?v=13";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -123,6 +123,85 @@
     const {data,error}=await sb.rpc("lynkora_my_daily_stats",{p_days:7});
     if(error){$("dailyChart").innerHTML=`<p class="msg">${esc(error.message)}</p>`;return}
     renderDailyChart($("dailyChart"),data,$("weekSummary"));
+  }
+
+
+  async function loadLinkDaily(code) {
+    if(!$("linkDailyChart") || !code) return;
+    $("linkDailyChart").innerHTML='<p class="muted">Đang tải...</p>';
+    const {data,error}=await sb.rpc("lynkora_my_link_daily_stats",{
+      p_code:code,
+      p_days:7
+    });
+    if(error){
+      $("linkDailyChart").innerHTML=`<p class="msg">${esc(errText(error))}</p>`;
+      return;
+    }
+    const rows=data||[];
+    renderDailyChart($("linkDailyChart"),rows,null);
+    const totalOpens=rows.reduce((a,x)=>a+Number(x.opens||0),0);
+    const totalValid=rows.reduce((a,x)=>a+Number(x.valid||0),0);
+    const totalInvalid=rows.reduce((a,x)=>a+Number(x.invalid||0),0);
+    const revenue=rows.reduce((a,x)=>a+Number(x.earned_vnd||0),0);
+    if($("linkDetailTitle")) $("linkDetailTitle").textContent=`${code} • 7 ngày`;
+    if($("linkDetailSubtitle")) $("linkDetailSubtitle").textContent=
+      `${totalOpens} mở • ${totalValid} hợp lệ • ${totalInvalid} không hợp lệ • ${pct(totalValid,totalOpens)}% hợp lệ`;
+    if($("linkDailyRevenue")) $("linkDailyRevenue").innerHTML=
+      `<span><small>Doanh thu 7 ngày</small><b>${fmtVnd(revenue)}</b></span>`;
+  }
+
+  async function loadLinkAnalytics() {
+    if(!$("linkAnalyticsBody")) return;
+    const {data,error}=await sb.rpc("lynkora_my_link_analytics");
+    if(error){
+      $("linkAnalyticsBody").innerHTML=`<tr><td colspan="7" class="msg">${esc(errText(error))}</td></tr>`;
+      if($("linkAnalyticsCards")) $("linkAnalyticsCards").innerHTML=`<p class="msg">${esc(errText(error))}</p>`;
+      return;
+    }
+
+    const rows=data||[];
+    if($("linkAnalyticsCount")) $("linkAnalyticsCount").textContent=`${rows.length} link`;
+
+    $("linkAnalyticsBody").innerHTML=rows.map(x=>`<tr>
+      <td><b>${esc(x.code)}</b><small class="analytics-target">${esc(x.target_url||"")}</small></td>
+      <td>${Number(x.opens||0)}</td>
+      <td>${Number(x.valid_clicks||0)}</td>
+      <td>${Number(x.invalid_clicks||0)}</td>
+      <td><b>${Number(x.valid_rate||0).toFixed(1)}%</b></td>
+      <td><b>${fmtVnd(x.earned_vnd)}</b></td>
+      <td><button class="ghost tiny link-detail-btn" data-code="${esc(x.code)}">7 ngày</button></td>
+    </tr>`).join("")||'<tr><td colspan="7">Bạn chưa có link nào.</td></tr>';
+
+    if($("linkAnalyticsCards")) $("linkAnalyticsCards").innerHTML=rows.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap">
+        <div><b>${esc(x.code)}</b><small>${x.is_active?"Đang bật":"Đã tắt"}</small></div>
+        <b>${fmtVnd(x.earned_vnd)}</b>
+      </div>
+      <div class="mini-metrics link-analytics-metrics">
+        <span><b>${Number(x.opens||0)}</b><small>Mở</small></span>
+        <span><b>${Number(x.valid_clicks||0)}</b><small>Hợp lệ</small></span>
+        <span><b>${Number(x.invalid_clicks||0)}</b><small>Không hợp lệ</small></span>
+        <span><b>${Number(x.valid_rate||0).toFixed(1)}%</b><small>Tỷ lệ</small></span>
+      </div>
+      <button class="ghost tiny link-detail-btn" data-code="${esc(x.code)}">Xem biểu đồ 7 ngày</button>
+    </article>`).join("")||'<p class="muted">Bạn chưa có link nào.</p>';
+
+    if($("linkAnalyticsSelect")){
+      $("linkAnalyticsSelect").innerHTML=rows.length
+        ? rows.map(x=>`<option value="${esc(x.code)}">${esc(x.code)}</option>`).join("")
+        : '<option value="">Chưa có link</option>';
+      $("linkAnalyticsSelect").disabled=!rows.length;
+      if(rows.length) await loadLinkDaily(rows[0].code);
+    }
+
+    document.querySelectorAll(".link-detail-btn").forEach(btn=>{
+      btn.onclick=async()=>{
+        const code=btn.dataset.code||"";
+        if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").value=code;
+        await loadLinkDaily(code);
+        $("linkDailyChart")?.scrollIntoView({behavior:"smooth",block:"center"});
+      };
+    });
   }
 
   async function loadWallet() {
@@ -251,7 +330,8 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
+    if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").onchange=()=>loadLinkDaily($("linkAnalyticsSelect").value);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
 
     if ($("payoutProfileForm")) $("payoutProfileForm").onsubmit=async e=>{
@@ -379,7 +459,7 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=12";return}
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=13";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
