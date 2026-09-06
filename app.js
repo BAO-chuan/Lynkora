@@ -75,10 +75,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=8";
+          if(data.session) location.href="dashboard.html?v=9";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=8";
+          if(error) throw error; location.href="dashboard.html?v=9";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -119,12 +119,35 @@
     renderDailyChart($("dailyChart"),data,$("weekSummary"));
   }
 
-  async function loadRevenue() {
-    if(!$("estimatedRevenue")) return;
-    const {data,error}=await sb.rpc("lynkora_my_revenue_summary");
-    if(error) return;
-    $("estimatedRevenue").textContent=fmtVnd(data?.estimated_vnd);
-    $("publisherCpm").textContent=`CPM ${fmtVnd(data?.cpm_vnd)}`;
+  async function loadWallet() {
+    if(!$("walletBalance")) return;
+    const [{data:wallet,error:we},{data:history,error:he}] = await Promise.all([
+      sb.rpc("lynkora_my_wallet_summary"),
+      sb.rpc("lynkora_my_earnings_history",{p_limit:50})
+    ]);
+    if(we||he) {
+      if($("earningsBody")) $("earningsBody").innerHTML=`<tr><td colspan="4" class="msg">${esc(errText(we||he))}</td></tr>`;
+      return;
+    }
+
+    $("walletBalance").textContent=fmtVnd(wallet?.balance_vnd);
+    $("walletLifetime").textContent=fmtVnd(wallet?.lifetime_earned_vnd);
+    $("walletEarnedVisits").textContent=Number(wallet?.earned_visits||0);
+    $("publisherCpm").textContent=`CPM hiện tại ${fmtVnd(wallet?.current_cpm_vnd)}`;
+
+    const rows=history||[];
+    if($("earningsCount")) $("earningsCount").textContent=`${rows.length} mục`;
+    if($("earningsBody")) $("earningsBody").innerHTML=rows.map(x=>`<tr>
+      <td>${fmtDate(x.earned_at)}</td>
+      <td><b>${esc(x.link_code||"—")}</b></td>
+      <td>${fmtVnd(x.cpm_vnd)}</td>
+      <td><b>+${fmtVnd(x.amount_vnd)}</b></td>
+    </tr>`).join("")||'<tr><td colspan="4">Chưa có doanh thu được ghi nhận.</td></tr>';
+
+    if($("earningsCards")) $("earningsCards").innerHTML=rows.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap"><div><b>${esc(x.link_code||"—")}</b><small>${fmtDate(x.earned_at)}</small></div><b class="earning-plus">+${fmtVnd(x.amount_vnd)}</b></div>
+      <small>CPM tại thời điểm ghi nhận: ${fmtVnd(x.cpm_vnd)}</small>
+    </article>`).join("")||'<p class="muted">Chưa có doanh thu được ghi nhận.</p>';
   }
 
   async function loadLinks() {
@@ -161,9 +184,9 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -172,7 +195,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -193,7 +216,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
@@ -243,23 +266,39 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=8";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re},{data:fraud,error:fe}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=9";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
       sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
-      sb.rpc("lynkora_admin_revenue_summary"),
+      sb.rpc("lynkora_admin_wallet_summary"),
+      sb.rpc("lynkora_admin_user_balances"),
       sb.rpc("lynkora_admin_fraud_logs",{p_limit:100})
     ]);
-    if(se||ue||le||de||re||fe){$("adminMsg").textContent=errText(se||ue||le||de||re||fe);return}
+    if(se||ue||le||de||we||be||fe){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe);return}
     $("admUsers").textContent=stats?.users_count??0;
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
     $("admValid").textContent=stats?.valid_clicks_count??0;
     if($("admInvalid")) $("admInvalid").textContent=stats?.invalid_clicks_count??0;
-    if($("cpmInput")) $("cpmInput").value=Math.round(Number(rev?.cpm_vnd||0));
-    if($("adminEstimatedRevenue")) $("adminEstimatedRevenue").textContent=fmtVnd(rev?.estimated_vnd);
+    if($("cpmInput")) $("cpmInput").value=Math.round(Number(wallet?.current_cpm_vnd||0));
+    if($("adminWalletBalance")) $("adminWalletBalance").textContent=fmtVnd(wallet?.total_balance_vnd);
+    if($("adminWalletVisits")) $("adminWalletVisits").textContent=Number(wallet?.earned_visits||0);
+
+    const balanceRows=balances||[];
+    if($("walletUsersCount")) $("walletUsersCount").textContent=`${balanceRows.length} tài khoản`;
+    if($("walletUsersBody")) $("walletUsersBody").innerHTML=balanceRows.map(x=>`<tr>
+      <td>${esc(x.email||"—")}</td>
+      <td>${esc(x.display_name||"—")}</td>
+      <td>${Number(x.earned_visits||0)}</td>
+      <td><b>${fmtVnd(x.balance_vnd)}</b></td>
+    </tr>`).join("")||'<tr><td colspan="4">Chưa có dữ liệu.</td></tr>';
+    if($("walletUsersCards")) $("walletUsersCards").innerHTML=balanceRows.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap"><div><b>${esc(x.display_name||"Không tên")}</b><small>${esc(x.email||"—")}</small></div><b>${fmtVnd(x.balance_vnd)}</b></div>
+      <small>${Number(x.earned_visits||0)} lượt đã ghi doanh thu</small>
+    </article>`).join("")||'<p class="muted">Chưa có dữ liệu.</p>';
+
     renderDailyChart($("adminDailyChart"),daily,$("adminWeekSummary"));
 
     $("usersBody").innerHTML=(users||[]).map(x=>`<tr><td>${esc(x.email)}</td><td>${esc(x.display_name||"—")}</td><td><span class="status ${x.role==="admin"?"on":"off"}">${esc(x.role)}</span></td><td>${Number(x.links_count||0)}</td><td>${Number(x.clicks_count||0)}</td><td>${Number(x.valid_clicks_count||0)}</td><td>${fmtDate(x.created_at)}</td></tr>`).join("")||'<tr><td colspan="7">Chưa có dữ liệu.</td></tr>';

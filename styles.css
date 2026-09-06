@@ -89,3 +89,14 @@
 .client-cell{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .client-preview{margin-top:6px}
 @media(max-width:700px){.fraud-reason-stats{grid-template-columns:1fr 1fr}}
+
+/* Lynkora v1.7 — Internal wallet & earnings ledger */
+.wallet-mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wallet-mini>span,.wallet-admin-summary>span{padding:12px 14px;border:1px solid #1c2c43;border-radius:12px;background:#081421}
+.wallet-mini small,.wallet-admin-summary small{display:block;color:var(--muted);margin-bottom:5px}
+.wallet-mini b,.wallet-admin-summary b{font-size:20px}
+.wallet-admin-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.earning-plus{white-space:nowrap}
+@media(max-width:700px){
+  .wallet-mini,.wallet-admin-summary{grid-template-columns:1fr}
+}
