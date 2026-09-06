@@ -1,9 +1,12 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=19"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=17">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=17">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
-<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.18</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
+<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.19</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
+<div class="panel"><span class="eyebrow">QUICK ACCESS • v1.19</span><h2>Chọn mục cần thao tác</h2><p class="muted compact">Dashboard đã được chia thành từng khu vực riêng. Dùng menu bên trái hoặc thanh điều hướng phía dưới trên điện thoại.</p></div></div>
+
+<div class="lynkora-view" data-view-panel="earnings">
 <div class="panel revenue-panel" id="publisherModelCard"><div class="row-between"><div><span class="eyebrow">EARNINGS MODEL • v1.17</span><h2>Thu nhập theo doanh thu đã chốt</h2><p class="muted compact">Thu nhập chỉ được cộng khi Admin chốt Revenue Cycle từ doanh thu quảng cáo đã xác nhận. CPM có thể thay đổi theo từng kỳ và không phải mức cố định.</p></div><span id="myModelStatus" class="pill">Đang tải...</span></div><div class="wallet-mini wallet-mini-v110"><span><small>Kỳ đã nhận</small><b id="mySettledCycles">0</b></span><span><small>Valid đã được trả</small><b id="myPaidVisits">0</b></span><span><small>Thu nhập từ chu kỳ</small><b id="myCycleEarnings">0 ₫</b></span><span><small>CPM kỳ gần nhất</small><b id="myLastCycleCpm">0 ₫</b></span></div></div>
 <div class="panel revenue-panel" id="pendingEarningsCard"><div class="row-between"><div><span class="eyebrow">PENDING EARNINGS • v1.18</span><h2>Thu nhập đang chờ chốt</h2><p class="muted compact">Các lượt hợp lệ bên dưới đã được Lynkora ghi nhận nhưng chưa được đưa vào earnings. Số tiền chỉ được xác định sau khi Admin chốt Revenue Cycle từ doanh thu quảng cáo đã xác nhận.</p></div><span id="pendingEarningsStatus" class="pill">Đang tải...</span></div><div class="wallet-mini wallet-mini-v110"><span><small>Valid chưa thanh toán</small><b id="pendingValidVisits">0</b></span><span><small>Trạng thái</small><b id="pendingSettlementState">Đang chờ chốt kỳ</b></span></div></div>
 <div class="panel revenue-panel wallet-panel"><div class="row-between"><div><span class="eyebrow">WALLET • v1.10</span><h2>Ví Publisher</h2><p class="muted compact">Số dư khả dụng đã trừ các yêu cầu đang chờ và các yêu cầu đã được Admin duyệt. Yêu cầu bị từ chối không làm giảm số dư.</p></div><div class="revenue-number"><small>Số dư khả dụng</small><b id="walletBalance">0 ₫</b><span id="publisherCpm">CPM 0 ₫</span></div></div><div class="wallet-mini wallet-mini-v110"><span><small>Tổng thu nhập</small><b id="walletLifetime">0 ₫</b></span><span><small>Đang chờ rút</small><b id="walletPending">0 ₫</b></span><span><small>Đã duyệt rút</small><b id="walletApproved">0 ₫</b></span><span><small>Lượt ghi doanh thu</small><b id="walletEarnedVisits">0</b></span></div></div>
@@ -13,7 +16,9 @@
   <div class="table-scroll desktop-only"><table><thead><tr><th>Thời gian</th><th>Mã link</th><th>CPM</th><th>Phát sinh</th></tr></thead><tbody id="earningsBody"><tr><td colspan="4">Đang tải...</td></tr></tbody></table></div>
   <div id="earningsCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
 </div>
+</div>
 
+<div class="lynkora-view" data-view-panel="withdraw">
 <div class="panel payout-profile-panel" id="payoutProfile">
   <div class="row-between"><div><span class="eyebrow">PAYOUT PROFILE</span><h2>Thông tin nhận tiền</h2><p class="muted compact">Lưu thông tin để dùng cho các yêu cầu rút sau này. Chỉ nhập thông tin nhận tiền; không nhập mật khẩu, mã PIN hay OTP.</p></div><span id="payoutProfileStatus" class="pill">Chưa lưu</span></div>
   <form id="payoutProfileForm" class="payout-profile-form">
@@ -47,7 +52,9 @@
   <div class="table-scroll desktop-only"><table><thead><tr><th>Thời gian</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th><th>Ghi chú Admin</th></tr></thead><tbody id="withdrawBody"><tr><td colspan="5">Đang tải...</td></tr></tbody></table></div>
   <div id="withdrawCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
 </div>
+</div>
 
+<div class="lynkora-view" data-view-panel="analytics">
 <div class="panel" id="analytics">
   <div class="row-between"><div><h2>7 ngày gần nhất</h2><p class="muted compact">Lượt mở và lượt hợp lệ theo ngày.</p></div><span id="weekSummary" class="pill">0 lượt</span></div>
   <div id="dailyChart" class="daily-chart"><p class="muted">Đang tải thống kê...</p></div>
@@ -89,9 +96,53 @@
     <div id="linkDailyRevenue" class="link-daily-revenue"></div>
   </div>
 </div>
+</div>
 
+<div class="lynkora-view" data-view-panel="links">
 <div class="panel" id="create"><h2>Tạo link mới</h2><form id="shortenForm" class="shorten"><input id="targetUrl" type="url" required placeholder="https://example.com/..."><button class="primary" type="submit">Rút gọn</button></form><div id="createMsg" class="msg"></div></div>
 
 <div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
+</div>
 </section></main>
+
+<style>
+.lynkora-view{display:none}.lynkora-view.active{display:block}
+.lynkora-side-nav .lynkora-nav{width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:11px 12px;border-radius:10px;cursor:pointer;font:inherit}
+.lynkora-side-nav .lynkora-nav:hover,.lynkora-side-nav .lynkora-nav.active{background:rgba(55,145,255,.12);color:#8fc7ff}
+.lynkora-bottom-nav{display:none}
+@media(max-width:800px){
+  body{padding-bottom:78px}
+  .lynkora-side-nav{display:none!important}
+  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
+  .lynkora-bottom-nav button{min-width:0;border:0;background:transparent;color:#8d9ab0;border-radius:13px;padding:7px 2px 6px;font-size:9px;font-weight:700;line-height:1.15}
+  .lynkora-bottom-nav button span{display:block;font-size:18px;line-height:22px;margin-bottom:2px}
+  .lynkora-bottom-nav button.active{background:rgba(55,145,255,.14);color:#8fc7ff}
+  .dash-main{padding-bottom:14px}
+}
+</style>
+<nav class="lynkora-bottom-nav" aria-label="Điều hướng Dashboard">
+  <button class="active" type="button" data-view="overview"><span>⌂</span>Tổng quan</button>
+  <button type="button" data-view="links"><span>↗</span>Links</button>
+  <button type="button" data-view="analytics"><span>▥</span>Thống kê</button>
+  <button type="button" data-view="earnings"><span>₫</span>Thu nhập</button>
+  <button type="button" data-view="withdraw"><span>⇄</span>Rút tiền</button>
+</nav>
+<script>
+(()=>{
+  const validViews=new Set(["overview","links","analytics","earnings","withdraw"]);
+  const buttons=[...document.querySelectorAll("[data-view]")];
+  const panels=[...document.querySelectorAll("[data-view-panel]")];
+  function showView(name,updateHash=true){
+    if(!validViews.has(name)) name="overview";
+    panels.forEach(p=>p.classList.toggle("active",p.dataset.viewPanel===name));
+    buttons.forEach(b=>b.classList.toggle("active",b.dataset.view===name));
+    if(updateHash) history.replaceState(null,"","#"+name);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  buttons.forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+  const initial=location.hash.slice(1);
+  showView(validViews.has(initial)?initial:"overview",false);
+  window.addEventListener("hashchange",()=>showView(location.hash.slice(1),false));
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=20"></script></body></html>
