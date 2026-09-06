@@ -496,6 +496,29 @@
     loadAdmin();
     $("adminLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
     $("adminRefreshBtn").onclick=loadAdmin;
+    if($("minWithdrawForm")) $("minWithdrawForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("minWithdrawForm").querySelector("button[type='submit']");
+      const value=Number($("minWithdrawInput").value);
+
+      if($("minWithdrawMsg")) $("minWithdrawMsg").textContent="Đang lưu...";
+      if(btn) btn.disabled=true;
+
+      try{
+        const {error}=await sb.rpc("lynkora_admin_set_min_withdrawal_vnd",{
+          p_value:value
+        });
+        if(error) throw error;
+
+        if($("minWithdrawMsg")) $("minWithdrawMsg").textContent="Đã cập nhật mức rút tối thiểu.";
+        await loadAdmin();
+      }catch(ex){
+        if($("minWithdrawMsg")) $("minWithdrawMsg").textContent=errText(ex);
+      }finally{
+        if(btn) btn.disabled=false;
+      }
+    };
+
     if($("cpmForm")) $("cpmForm").onsubmit=async e=>{
       e.preventDefault();
       $("adminMsg").textContent="";
