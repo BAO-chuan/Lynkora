@@ -19,6 +19,20 @@
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
     return k;
   };
+  const edgeUrl = name => `${cfg.SUPABASE_URL}/functions/v1/${name}`;
+  async function edgePost(name, body) {
+    const res=await fetch(edgeUrl(name),{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":cfg.SUPABASE_PUBLISHABLE_KEY
+      },
+      body:JSON.stringify(body)
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+    return data;
+  }
 
   async function requireUser() {
     if (!sb) { alert("Bạn chưa cấu hình Supabase trong config.js"); location.href="index.html"; return null; }
@@ -56,10 +70,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=6";
+          if(data.session) location.href="dashboard.html?v=7";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=6";
+          if(error) throw error; location.href="dashboard.html?v=7";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -184,8 +198,9 @@
     let target=null, token=null;
     (async()=>{
       if(!sb){$("gateMsg").textContent="Website chưa được cấu hình backend.";return}
-      const {data,error}=await sb.rpc("lynkora_open_link",{p_code:code,p_client_key:clientKey()});
-      if(error){$("gateMsg").textContent=errText(error);return}
+      let data;
+      try{ data=await edgePost("lynkora-open",{code,client_key:clientKey()}); }
+      catch(error){$("gateMsg").textContent=errText(error);return}
       target=data?.target_url; token=data?.visit_token;
       let n=5; $("countdown").textContent=n;
       const timer=setInterval(()=>{n--; $("countdown").textContent=n; if(n<=0){clearInterval(timer);$("continueBtn").disabled=false;$("continueBtn").textContent="Tiếp tục đến liên kết"}},1000);
@@ -194,9 +209,8 @@
       if(!target||!token)return;
       $("continueBtn").disabled=true;
       try{
-        const {data,error}=await sb.rpc("lynkora_complete_visit",{p_visit_token:token});
-        if(error) throw error;
-        if(data!==true) throw new Error("Lượt truy cập chưa đủ điều kiện hoặc token đã được sử dụng.");
+        const data=await edgePost("lynkora-complete",{visit_token:token});
+        if(data?.ok!==true) throw new Error(data?.message || "Lượt truy cập chưa đủ điều kiện hoặc token đã được sử dụng.");
         location.href=target;
       }catch(ex){$("gateMsg").textContent=errText(ex);$("continueBtn").disabled=false}
     };
@@ -224,7 +238,7 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=6";return}
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=7";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
