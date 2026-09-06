@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=24"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=25"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=24">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.24</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng, trạng thái tài khoản, ví, link, doanh thu và yêu cầu rút tiền.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.25</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng, trạng thái tài khoản, ví, link, doanh thu và yêu cầu rút tiền.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article><article><small>Bị từ chối</small><b id="admInvalid">0</b></article></div>
 
@@ -14,6 +14,14 @@
     <div class="row-between"><div><span class="eyebrow">WITHDRAWAL CONFIG</span><h2>Cấu hình rút tiền</h2><p class="muted compact">Thiết lập mức rút tối thiểu áp dụng cho mọi Publisher.</p></div><span id="adminMinWithdrawPill" class="pill">Tối thiểu 0 ₫</span></div>
     <form id="minWithdrawForm" class="cpm-form"><label>Rút tối thiểu (VND)<input id="minWithdrawInput" type="number" min="1000" max="1000000000" step="1000" required></label><button class="primary" type="submit">Lưu mức rút</button></form>
     <div id="minWithdrawMsg" class="msg"></div>
+  </div>
+
+
+  <div class="panel referral-admin-panel" id="referralAdminPanel">
+    <div class="row-between"><div><span class="eyebrow">REFERRAL CONFIG • v1.25</span><h2>Hoa hồng giới thiệu</h2><p class="muted compact">Thiết lập tỷ lệ thưởng cho người giới thiệu. Hoa hồng chỉ phát sinh khi earnings của Publisher được chốt theo Revenue Cycle.</p></div><span id="adminReferralPill" class="pill">Đang tải...</span></div>
+    <form id="referralConfigForm" class="cpm-form referral-config-form"><label>Hoa hồng referral (%)<input id="referralCommissionInput" type="number" min="0" max="30" step="0.1" required></label><button class="primary" type="submit">Lưu hoa hồng</button></form>
+    <div id="referralConfigMsg" class="msg"></div>
+    <div class="referral-admin-stats"><span><small>Tài khoản được giới thiệu</small><b id="adminReferralUsers">0</b></span><span><small>Earnings của người được mời</small><b id="adminReferralBase">0 ₫</b></span><span><small>Đã trả hoa hồng</small><b id="adminReferralRewards">0 ₫</b></span></div>
   </div>
 
   <div class="panel" id="walletUsers">
@@ -111,4 +119,4 @@
   </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=24"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=25"></script></body></html>

@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=24"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=25"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=17">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><button class="lynkora-nav" type="button" data-view="about">ⓘ Giới thiệu</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
-<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.21</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="referral">◎ Giới thiệu bạn bè</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><button class="lynkora-nav" type="button" data-view="about">ⓘ Giới thiệu</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
+<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.25</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel"><span class="eyebrow">QUICK ACCESS • v1.19</span><h2>Chọn mục cần thao tác</h2><p class="muted compact">Dashboard đã được chia thành từng khu vực riêng. Dùng menu bên trái hoặc thanh điều hướng phía dưới trên điện thoại.</p></div></div>
@@ -163,6 +163,20 @@
 </div>
 </div>
 
+<div class="lynkora-view" data-view-panel="referral">
+<div class="dash-title"><div><span class="eyebrow">REFERRAL • v1.25</span><h1>Giới thiệu bạn bè</h1><p class="muted compact">Chia sẻ mã hoặc link giới thiệu. Khi Publisher bạn mời có earnings được chốt theo Revenue Cycle, bạn nhận hoa hồng theo tỷ lệ Admin đang cấu hình.</p></div></div>
+<div class="stats referral-stats"><article><small>Đã mời</small><b id="referralInvited">0</b></article><article><small>Đã có earnings</small><b id="referralActive">0</b></article><article><small>Hoa hồng</small><b id="referralCommission">0%</b></article><article><small>Đã nhận</small><b id="referralEarned">0 ₫</b></article></div>
+<div class="panel referral-share-panel">
+  <div class="row-between"><div><span class="eyebrow">YOUR REFERRAL</span><h2>Mã giới thiệu của bạn</h2><p class="muted compact">Người mới nhập mã này khi đăng ký. Một tài khoản chỉ có thể gắn với một người giới thiệu ngay lúc tạo tài khoản.</p></div><span id="referralCodePill" class="pill">Đang tải...</span></div>
+  <div class="referral-share-grid"><label>Mã giới thiệu<div class="referral-copy-row"><input id="referralCode" readonly value=""><button id="copyReferralCode" class="ghost" type="button">Sao chép</button></div></label><label>Link đăng ký<div class="referral-copy-row"><input id="referralUrl" readonly value=""><button id="copyReferralUrl" class="primary" type="button">Sao chép link</button></div></label></div>
+  <p class="fine">Hoa hồng referral là phần thưởng bổ sung của Lynkora, được ghi vào ví sau khi chu kỳ doanh thu của Publisher được chốt. Không tự cộng chỉ vì có lượt đăng ký.</p>
+</div>
+<div class="panel">
+  <div class="row-between"><div><h2>Người bạn đã giới thiệu</h2><p class="muted compact">Chỉ hiển thị tên Publisher và số liệu earnings liên quan; Lynkora không công khai email của họ trong danh sách này.</p></div><button id="refreshReferralBtn" class="ghost mobile-keep" type="button">Làm mới</button></div>
+  <div class="table-scroll desktop-only"><table><thead><tr><th>Publisher</th><th>Ngày tham gia</th><th>Earnings của họ</th><th>Hoa hồng của bạn</th><th>Cập nhật gần nhất</th></tr></thead><tbody id="referralBody"><tr><td colspan="5">Đang tải...</td></tr></tbody></table></div>
+  <div id="referralCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
+</div>
+</div>
 <div class="lynkora-view" data-view-panel="account">
 <div class="panel">
   <div class="row-between"><div><span class="eyebrow">ACCOUNT • v1.19.1</span><h2>Tài khoản Publisher</h2><p class="muted compact">Quản lý thông tin cơ bản và bảo mật tài khoản Lynkora.</p></div><span id="accountRole" class="pill">Publisher</span></div>
@@ -229,7 +243,7 @@
 @media(max-width:800px){
   body{padding-bottom:78px}
   .lynkora-side-nav{display:none!important}
-  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
+  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
   .lynkora-bottom-nav button{min-width:0;border:0;background:transparent;color:#8d9ab0;border-radius:13px;padding:7px 2px 6px;font-size:8px;font-weight:700;line-height:1.15}
   .lynkora-bottom-nav button span{display:block;font-size:18px;line-height:22px;margin-bottom:2px}
   .lynkora-bottom-nav button.active{background:rgba(55,145,255,.14);color:#8fc7ff}
@@ -242,12 +256,13 @@
   <button type="button" data-view="analytics"><span>▥</span>Thống kê</button>
   <button type="button" data-view="earnings"><span>₫</span>Thu nhập</button>
   <button type="button" data-view="withdraw"><span>⇄</span>Rút tiền</button>
+  <button type="button" data-view="referral"><span>◎</span>Mời bạn</button>
   <button type="button" data-view="account"><span>⚙</span>Tài khoản</button>
   <button type="button" data-view="about"><span>ⓘ</span>Giới thiệu</button>
 </nav>
 <script>
 (()=>{
-  const validViews=new Set(["overview","links","analytics","earnings","withdraw","account","about"]);
+  const validViews=new Set(["overview","links","analytics","earnings","withdraw","referral","account","about"]);
   const buttons=[...document.querySelectorAll("[data-view]")];
   const panels=[...document.querySelectorAll("[data-view-panel]")];
   function showView(name,updateHash=true){
@@ -263,4 +278,4 @@
   window.addEventListener("hashchange",()=>showView(location.hash.slice(1),false));
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=24"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=25"></script></body></html>

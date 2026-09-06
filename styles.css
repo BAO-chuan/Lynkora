@@ -295,3 +295,29 @@ body.modal-open{overflow:hidden}
   .admin-user-summary span{padding:9px}
   .admin-user-summary b{font-size:15px}
 }
+
+/* =========================================================
+   LYNKORA v1.25 — REFERRAL SYSTEM
+   ========================================================= */
+.referral-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.referral-share-grid{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-top:18px}
+.referral-share-grid label{display:grid;gap:7px;color:var(--muted);font-size:12px;font-weight:700}
+.referral-copy-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.referral-copy-row input{margin:0;min-width:0}
+.referral-copy-row button{white-space:nowrap}
+.referral-admin-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:15px}
+.referral-admin-stats span{display:grid;gap:5px;padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
+.referral-admin-stats small{font-size:10px;color:var(--muted)}
+.referral-admin-stats b{font-size:18px}
+.referral-config-form{margin-top:16px;max-width:560px}
+.referral-card-amount{color:#71f0bb}
+#referralCode,#referralUrl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+#referralWrap small{font-weight:500}
+
+@media(max-width:760px){
+  .referral-stats{grid-template-columns:1fr 1fr}
+  .referral-share-grid{grid-template-columns:1fr}
+  .referral-copy-row{grid-template-columns:1fr}
+  .referral-copy-row button{width:100%}
+  .referral-admin-stats{grid-template-columns:1fr}
+}

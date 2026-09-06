@@ -86,6 +86,7 @@
 
   if ($("authForm")) {
     let mode = location.hash === "#register" ? "register" : "login";
+    const referralFromUrl=(new URLSearchParams(location.search).get("ref")||"").trim().toUpperCase();
 
     const setRequired=(id,required)=>{
       const el=$(id);
@@ -102,6 +103,8 @@
       $("loginTab")?.classList.toggle("active", isLogin);
       $("registerTab")?.classList.toggle("active", isRegister);
       $("nameWrap")?.classList.toggle("hidden", !isRegister);
+      $("referralWrap")?.classList.toggle("hidden", !isRegister);
+      if(isRegister && referralFromUrl && $("referralCodeInput") && !$("referralCodeInput").value) $("referralCodeInput").value=referralFromUrl;
       $("emailWrap")?.classList.toggle("hidden", isReset);
       $("passwordWrap")?.classList.toggle("hidden", isForgot);
       $("confirmPasswordWrap")?.classList.toggle("hidden", !isReset);
@@ -168,7 +171,13 @@
       $("submitBtn").disabled=true;
       try {
         if (mode==="register") {
-          const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
+          const referralCode=($("referralCodeInput")?.value||"").trim().toUpperCase();
+          if(referralCode){
+            const {data:valid,error:validError}=await sb.rpc("lynkora_validate_referral_code",{p_code:referralCode});
+            if(validError) throw validError;
+            if(!valid) throw new Error("Mã giới thiệu không hợp lệ.");
+          }
+          const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim(),referral_code:referralCode||null}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
           if(data.session) location.href="dashboard.html?v=19";
@@ -335,14 +344,14 @@
     if($("earningsCount")) $("earningsCount").textContent=`${rows.length} mục`;
     if($("earningsBody")) $("earningsBody").innerHTML=rows.map(x=>`<tr>
       <td>${fmtDate(x.earned_at)}</td>
-      <td><b>${esc(x.link_code||"—")}</b></td>
-      <td>${fmtVnd(x.cpm_vnd)}</td>
+      <td><b>${esc(x.link_code==="REFERRAL"?"Hoa hồng giới thiệu":(x.link_code||"—"))}</b></td>
+      <td>${x.link_code==="REFERRAL"?"—":fmtVnd(x.cpm_vnd)}</td>
       <td><b>+${fmtVnd(x.amount_vnd)}</b></td>
     </tr>`).join("")||'<tr><td colspan="4">Chưa có doanh thu được ghi nhận.</td></tr>';
 
     if($("earningsCards")) $("earningsCards").innerHTML=rows.map(x=>`<article class="mobile-admin-card">
-      <div class="row-between gap"><div><b>${esc(x.link_code||"—")}</b><small>${fmtDate(x.earned_at)}</small></div><b class="earning-plus">+${fmtVnd(x.amount_vnd)}</b></div>
-      <small>CPM tại thời điểm ghi nhận: ${fmtVnd(x.cpm_vnd)}</small>
+      <div class="row-between gap"><div><b>${esc(x.link_code==="REFERRAL"?"Hoa hồng giới thiệu":(x.link_code||"—"))}</b><small>${fmtDate(x.earned_at)}</small></div><b class="earning-plus">+${fmtVnd(x.amount_vnd)}</b></div>
+      <small>${x.link_code==="REFERRAL"?"Phần thưởng referral đã ghi vào ví.":`CPM tại thời điểm ghi nhận: ${fmtVnd(x.cpm_vnd)}`}</small>
     </article>`).join("")||'<p class="muted">Chưa có doanh thu được ghi nhận.</p>';
   }
 
@@ -376,6 +385,33 @@
     if($('publisherCpm')) $('publisherCpm').textContent=`CPM kỳ gần nhất ${fmtVnd(data?.last_cycle_cpm_vnd)}`;
   }
 
+
+  async function loadReferral(){
+    if(!$("referralCode")) return;
+    const [{data:summary,error:se},{data:rows,error:re}]=await Promise.all([
+      sb.rpc("lynkora_my_referral_summary"),
+      sb.rpc("lynkora_my_referrals",{p_limit:100})
+    ]);
+    if(se||re){
+      if($("referralBody")) $("referralBody").innerHTML=`<tr><td colspan="5" class="msg">${esc(errText(se||re))}</td></tr>`;
+      if($("referralCards")) $("referralCards").innerHTML=`<p class="msg">${esc(errText(se||re))}</p>`;
+      return;
+    }
+    const code=summary?.referral_code||"";
+    const url=new URL("auth.html",location.href);
+    url.searchParams.set("ref",code);
+    url.hash="register";
+    $("referralCode").value=code;
+    $("referralUrl").value=url.href;
+    if($("referralCodePill")) $("referralCodePill").textContent=code||"Chưa có mã";
+    if($("referralInvited")) $("referralInvited").textContent=Number(summary?.invited_count||0).toLocaleString("vi-VN");
+    if($("referralActive")) $("referralActive").textContent=Number(summary?.active_invited_count||0).toLocaleString("vi-VN");
+    if($("referralCommission")) $("referralCommission").textContent=`${Number(summary?.commission_percent||0).toLocaleString("vi-VN")}%`;
+    if($("referralEarned")) $("referralEarned").textContent=fmtVnd(summary?.referral_earnings_vnd);
+    const items=rows||[];
+    if($("referralBody")) $("referralBody").innerHTML=items.map(x=>`<tr><td><b>${esc(x.display_name||"Publisher")}</b></td><td>${fmtDate(x.joined_at)}</td><td>${fmtVnd(x.publisher_earnings_vnd)}</td><td><b class="referral-card-amount">+${fmtVnd(x.referral_reward_vnd)}</b></td><td>${fmtDate(x.last_reward_at)}</td></tr>`).join("")||'<tr><td colspan="5">Bạn chưa giới thiệu Publisher nào.</td></tr>';
+    if($("referralCards")) $("referralCards").innerHTML=items.map(x=>`<article class="mobile-admin-card"><div class="row-between gap"><div><b>${esc(x.display_name||"Publisher")}</b><small>Tham gia ${fmtDate(x.joined_at)}</small></div><b class="referral-card-amount">+${fmtVnd(x.referral_reward_vnd)}</b></div><div class="mini-metrics"><span><b>${fmtVnd(x.publisher_earnings_vnd)}</b><small>Earnings Publisher</small></span><span><b>${fmtDate(x.last_reward_at)}</b><small>Hoa hồng gần nhất</small></span></div></article>`).join("")||'<p class="muted">Bạn chưa giới thiệu Publisher nào.</p>';
+  }
 
   async function loadPayoutProfile() {
     if(!$("payoutProfileForm")) return;
@@ -532,9 +568,12 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile(),loadReferral()]);
     if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").onchange=()=>loadLinkDaily($("linkAnalyticsSelect").value);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
+    if($("copyReferralCode")) $("copyReferralCode").onclick=()=>copyText($("referralCode")?.value||"",$("copyReferralCode"));
+    if($("copyReferralUrl")) $("copyReferralUrl").onclick=()=>copyText($("referralUrl")?.value||"",$("copyReferralUrl"));
+    if($("refreshReferralBtn")) $("refreshReferralBtn").onclick=loadReferral;
     if($("accountLogoutBtn")) $("accountLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
 
     if($("accountProfileForm")) $("accountProfileForm").onsubmit=async e=>{
@@ -614,7 +653,7 @@
       }
     };
 
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile(),loadReferral()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim();
@@ -635,7 +674,7 @@
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
         $("shortenForm").reset();
-        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile(),loadReferral()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -662,7 +701,7 @@
           if(error) throw error;
           if(activeDetailCode===code) closeLinkDetail();
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile(),loadReferral()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
 
@@ -769,7 +808,7 @@
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
     if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=19";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce},{data:revctl,error:rce}] = await Promise.all([
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce},{data:revctl,error:rce},{data:refcfg,error:refce},{data:refstats,error:refse}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_user_management",{p_search:null,p_limit:200}),
       sb.rpc("lynkora_admin_links"),
@@ -779,7 +818,9 @@
       sb.rpc("lynkora_admin_fraud_logs",{p_limit:100}),
       sb.rpc("lynkora_admin_withdrawals",{p_limit:100}),
       sb.rpc("lynkora_admin_withdrawal_config"),
-      sb.rpc("lynkora_admin_revenue_control")
+      sb.rpc("lynkora_admin_revenue_control"),
+      sb.rpc("lynkora_admin_referral_config"),
+      sb.rpc("lynkora_admin_referral_stats")
     ]);
     if(se||ue||le||de||we||be||fe||wde||wce){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe||wde||wce);return}
     $("admUsers").textContent=stats?.users_count??0;
@@ -804,6 +845,15 @@
       if($("dynamicValidVisits")) $("dynamicValidVisits").textContent=`${Number(revctl.valid_visits_count||0).toLocaleString("vi-VN")} valid visits`;
     }else if(rce && $("revenueControlMsg")){
       $("revenueControlMsg").textContent=errText(rce);
+    }
+    if(!refce && refcfg){
+      if($("referralCommissionInput")) $("referralCommissionInput").value=Number(refcfg.commission_percent||0);
+      if($("adminReferralPill")) $("adminReferralPill").textContent=`${Number(refcfg.commission_percent||0).toLocaleString("vi-VN")}% hoa hồng`;
+    }else if(refce && $("referralConfigMsg")) $("referralConfigMsg").textContent=errText(refce);
+    if(!refse && refstats){
+      if($("adminReferralUsers")) $("adminReferralUsers").textContent=Number(refstats.referred_users||0).toLocaleString("vi-VN");
+      if($("adminReferralBase")) $("adminReferralBase").textContent=fmtVnd(refstats.referred_earnings_vnd);
+      if($("adminReferralRewards")) $("adminReferralRewards").textContent=fmtVnd(refstats.total_rewards_vnd);
     }
     if($("adminWalletEarned")) $("adminWalletEarned").textContent=fmtVnd(wallet?.total_earned_vnd);
     if($("adminWalletPending")) $("adminWalletPending").textContent=fmtVnd(wallet?.total_pending_vnd);
@@ -1026,7 +1076,7 @@ if($("usersBody")){
         if(!confirm("Chốt chu kỳ này? Earnings sẽ được ghi cho valid visits của kỳ và không thể chốt lại.")) return;
         const {data,error}=await sb.rpc("lynkora_admin_settle_revenue_cycle",{p_cycle_id:id});
         if(error) throw error;
-        if($("cycleMsg")) $("cycleMsg").textContent=`Đã chốt: ${Number(data?.valid_visits_count||0).toLocaleString("vi-VN")} valid visits · ${fmtVnd(data?.settled_earnings_vnd)} earnings.`;
+        if($("cycleMsg")) $("cycleMsg").textContent=`Đã chốt: ${Number(data?.valid_visits_count||0).toLocaleString("vi-VN")} valid visits · ${fmtVnd(data?.settled_earnings_vnd)} earnings · ${fmtVnd(data?.referral_rewards_vnd)} referral.`;
         await Promise.all([loadRevenueCycles(),loadAdmin(),loadPublisherModelAdmin()]);
       }else if(action==="delete"){
         if(!confirm("Xóa chu kỳ bản nháp này?")) return;
@@ -1038,6 +1088,24 @@ if($("usersBody")){
     }catch(ex){ if($("cycleMsg")) $("cycleMsg").textContent=errText(ex); }
     finally{ b.disabled=false; }
   });
+
+if($("referralConfigForm")) $("referralConfigForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("referralConfigForm").querySelector("button[type='submit']");
+      if($("referralConfigMsg")) $("referralConfigMsg").textContent="Đang lưu...";
+      if(btn) btn.disabled=true;
+      try{
+        const value=Number($("referralCommissionInput").value);
+        const {data,error}=await sb.rpc("lynkora_admin_set_referral_commission_percent",{p_percent:value});
+        if(error) throw error;
+        if($("referralConfigMsg")) $("referralConfigMsg").textContent=`Đã đặt hoa hồng referral ${Number(data?.commission_percent??value).toLocaleString("vi-VN")}%.`;
+        await loadAdmin();
+      }catch(ex){
+        if($("referralConfigMsg")) $("referralConfigMsg").textContent=errText(ex);
+      }finally{
+        if(btn) btn.disabled=false;
+      }
+    };
 
 if($("minWithdrawForm")) $("minWithdrawForm").onsubmit=async e=>{
       e.preventDefault();
