@@ -36,6 +36,8 @@
   const qrUrl = value => `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(value)}`;
   let publisherLinks=[];
   let activeDetailCode=null;
+  let adminManagedUsers=[];
+  let adminWalletRows=[];
   const clientKey = () => {
     let k=localStorage.getItem("lynkora_client_key");
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
@@ -60,6 +62,19 @@
     if (!sb) { alert("Bạn chưa cấu hình Supabase trong config.js"); location.href="index.html"; return null; }
     const { data, error } = await sb.auth.getUser();
     if (error || !data.user) { location.href="auth.html"; return null; }
+
+    // v1.24: tài khoản bị Admin khóa sẽ bị kết thúc phiên khi vào các trang cần đăng nhập.
+    try{
+      const {data:status,error:statusError}=await sb.rpc("lynkora_my_account_status");
+      if(!statusError && status?.is_suspended){
+        const reason=status?.suspended_reason ? `\nLý do: ${status.suspended_reason}` : "";
+        await sb.auth.signOut();
+        alert(`Tài khoản Lynkora của bạn đang bị khóa.${reason}`);
+        location.href="auth.html";
+        return null;
+      }
+    }catch(_){ /* Giữ tương thích nếu SQL v1.24 chưa được chạy. */ }
+
     return data.user;
   }
 
@@ -701,12 +716,42 @@
     };
   }
 
+  function walletForAdminUser(x){
+    const byId=adminWalletRows.find(w=>w.user_id && x.user_id && String(w.user_id)===String(x.user_id));
+    if(byId) return byId;
+    return adminWalletRows.find(w=>String(w.email||"").toLowerCase()===String(x.email||"").toLowerCase()) || null;
+  }
+
+  function adminUserStatus(x){
+    if(x.role==="admin") return {text:"Admin",cls:"on"};
+    return x.is_suspended ? {text:"Đã khóa",cls:"off"} : {text:"Hoạt động",cls:"on"};
+  }
+
   function adminUserCard(x){
-    return `<article class="mobile-admin-card">
-      <div class="row-between gap"><div><b>${esc(x.display_name||"Không tên")}</b><small>${esc(x.email)}</small></div><span class="status ${x.role==="admin"?"on":"off"}">${esc(x.role)}</span></div>
+    const st=adminUserStatus(x), wallet=walletForAdminUser(x);
+    const canLock=x.role!=="admin";
+    return `<article class="mobile-admin-card admin-user-card" data-user-id="${esc(x.user_id||"")}">
+      <div class="row-between gap"><div><b>${esc(x.display_name||"Không tên")}</b><small>${esc(x.email||"—")}</small></div><span class="status ${st.cls}">${esc(st.text)}</span></div>
       <div class="mini-metrics"><span><b>${Number(x.links_count||0)}</b><small>Links</small></span><span><b>${Number(x.clicks_count||0)}</b><small>Mở</small></span><span><b>${Number(x.valid_clicks_count||0)}</b><small>Hợp lệ</small></span></div>
+      <div class="admin-user-wallet-line"><span>Số dư khả dụng</span><b>${fmtVnd(wallet?.available_vnd)}</b></div>
+      ${x.suspended_reason?`<small class="admin-suspend-reason">Lý do khóa: ${esc(x.suspended_reason)}</small>`:""}
       <small>Tạo: ${fmtDate(x.created_at)}</small>
+      ${canLock?`<div class="mobile-card-actions"><button class="${x.is_suspended?"primary":"danger"} tiny admin-user-action" data-user-action="${x.is_suspended?"unlock":"lock"}">${x.is_suspended?"Mở khóa tài khoản":"Khóa tài khoản"}</button></div>`:'<small class="muted">Tài khoản Admin được bảo vệ.</small>'}
     </article>`;
+  }
+
+  function renderAdminUsers(filter=""){
+    if(!$('usersBody') || !$('usersCards')) return;
+    const q=String(filter||"").trim().toLowerCase();
+    const rows=adminManagedUsers.filter(x=>!q || String(x.email||"").toLowerCase().includes(q) || String(x.display_name||"").toLowerCase().includes(q));
+    if($('adminManagedUsers')) $('adminManagedUsers').textContent=adminManagedUsers.length;
+    if($('adminActiveUsers')) $('adminActiveUsers').textContent=adminManagedUsers.filter(x=>!x.is_suspended).length;
+    if($('adminSuspendedUsers')) $('adminSuspendedUsers').textContent=adminManagedUsers.filter(x=>x.is_suspended).length;
+    $('usersBody').innerHTML=rows.map(x=>{
+      const st=adminUserStatus(x), wallet=walletForAdminUser(x), canLock=x.role!=="admin";
+      return `<tr data-user-id="${esc(x.user_id||"")}"><td>${esc(x.email||"—")}</td><td>${esc(x.display_name||"—")}</td><td><span class="status ${x.role==="admin"?"on":"off"}">${esc(x.role||"publisher")}</span></td><td><span class="status ${st.cls}">${esc(st.text)}</span>${x.suspended_reason?`<br><small>${esc(x.suspended_reason)}</small>`:""}</td><td><b>${fmtVnd(wallet?.available_vnd)}</b></td><td>${Number(x.links_count||0)}</td><td>${Number(x.clicks_count||0)}</td><td>${Number(x.valid_clicks_count||0)}</td><td>${fmtDate(x.created_at)}</td><td>${canLock?`<button class="${x.is_suspended?"primary":"danger"} tiny admin-user-action" data-user-action="${x.is_suspended?"unlock":"lock"}">${x.is_suspended?"Mở khóa":"Khóa"}</button>`:"—"}</td></tr>`;
+    }).join("")||'<tr><td colspan="10">Không tìm thấy người dùng.</td></tr>';
+    $('usersCards').innerHTML=rows.map(adminUserCard).join("")||'<p class="muted">Không tìm thấy người dùng.</p>';
   }
 
   function adminLinkCard(x){
@@ -726,7 +771,7 @@
     if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=19";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce},{data:revctl,error:rce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
-      sb.rpc("lynkora_admin_users"),
+      sb.rpc("lynkora_admin_user_management",{p_search:null,p_limit:200}),
       sb.rpc("lynkora_admin_links"),
       sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
       sb.rpc("lynkora_admin_wallet_summary"),
@@ -767,6 +812,7 @@
     if($("adminWalletVisits")) $("adminWalletVisits").textContent=Number(wallet?.earned_visits||0);
 
     const balanceRows=balances||[];
+    adminWalletRows=balanceRows;
     if($("walletUsersCount")) $("walletUsersCount").textContent=`${balanceRows.length} tài khoản`;
     if($("walletUsersBody")) $("walletUsersBody").innerHTML=balanceRows.map(x=>`<tr>
       <td>${esc(x.email||"—")}</td>
@@ -789,8 +835,8 @@
 
     renderDailyChart($("adminDailyChart"),daily,$("adminWeekSummary"));
 
-    $("usersBody").innerHTML=(users||[]).map(x=>`<tr><td>${esc(x.email)}</td><td>${esc(x.display_name||"—")}</td><td><span class="status ${x.role==="admin"?"on":"off"}">${esc(x.role)}</span></td><td>${Number(x.links_count||0)}</td><td>${Number(x.clicks_count||0)}</td><td>${Number(x.valid_clicks_count||0)}</td><td>${fmtDate(x.created_at)}</td></tr>`).join("")||'<tr><td colspan="7">Chưa có dữ liệu.</td></tr>';
-    $("usersCards").innerHTML=(users||[]).map(adminUserCard).join("")||'<p class="muted">Chưa có dữ liệu.</p>';
+    adminManagedUsers=users||[];
+    renderAdminUsers($("adminUserSearch")?.value||"");
 
     const linkRows=(links||[]);
     $("adminLinksBody").innerHTML=linkRows.map(x=>`<tr data-id="${esc(x.link_id)}"><td><b>${esc(x.code)}</b></td><td>${esc(x.owner_email)}</td><td class="url-cell">${esc(x.target_url)}</td><td><span class="status ${x.is_active?"on":"off"}">${x.is_active?"Bật":"Tắt"}</span></td><td>${Number(x.click_count||0)}</td><td>${Number(x.valid_click_count||0)}</td><td><div class="table-actions"><button class="ghost tiny" data-admin-action="toggle" data-active="${x.is_active?'1':'0'}">${x.is_active?'Tắt':'Bật'}</button><button class="danger tiny" data-admin-action="delete">Xóa</button></div></td></tr>`).join("")||'<tr><td colspan="7">Chưa có link.</td></tr>';
@@ -916,6 +962,36 @@ if($("usersBody")){
     loadPublisherModelAdmin();
     $("adminLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
     $("adminRefreshBtn").onclick=()=>Promise.all([loadAdmin(),loadRevenueCycles(),loadPublisherModelAdmin()]);
+    if($("adminUserSearch")) $("adminUserSearch").oninput=e=>renderAdminUsers(e.target.value);
+
+    const handleAdminUserAction=async e=>{
+      const btn=e.target.closest?.(".admin-user-action");
+      if(!btn) return;
+      const holder=btn.closest("[data-user-id]");
+      const userId=holder?.dataset.userId;
+      const row=adminManagedUsers.find(x=>String(x.user_id)===String(userId));
+      if(!row) return;
+      const locking=btn.dataset.userAction==="lock";
+      let reason=null;
+      if(locking){
+        reason=prompt(`Lý do khóa ${row.email||"tài khoản"}:`,"Vi phạm quy định Lynkora")||"";
+        if(!reason.trim()) return;
+        if(!confirm(`Khóa tài khoản ${row.email}? Người dùng sẽ bị đăng xuất khi truy cập lại Lynkora.`)) return;
+      }else if(!confirm(`Mở khóa tài khoản ${row.email}?`)) return;
+      btn.disabled=true;
+      if($("adminUserActionMsg")) $("adminUserActionMsg").textContent=locking?"Đang khóa tài khoản...":"Đang mở khóa tài khoản...";
+      try{
+        const {error}=await sb.rpc("lynkora_admin_set_user_suspended",{p_user_id:userId,p_suspended:locking,p_reason:locking?reason.trim():null});
+        if(error) throw error;
+        if($("adminUserActionMsg")) $("adminUserActionMsg").textContent=locking?"Đã khóa tài khoản.":"Đã mở khóa tài khoản.";
+        await loadAdmin();
+      }catch(ex){
+        if($("adminUserActionMsg")) $("adminUserActionMsg").textContent=errText(ex);
+        btn.disabled=false;
+      }
+    };
+    $("usersBody").addEventListener("click",handleAdminUserAction);
+    $("usersCards").addEventListener("click",handleAdminUserAction);
     
   if($("cycleForm")) $("cycleForm").onsubmit=async e=>{
     e.preventDefault();
