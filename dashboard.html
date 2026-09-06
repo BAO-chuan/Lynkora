@@ -1,10 +1,10 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=4"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=5"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=3">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
 <main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=3">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=3">Admin</a></aside>
-<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.3</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.3.1</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-four"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article></div>
-<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">REVENUE • DEMO</span><h2>Doanh thu ước tính</h2><p class="muted compact">Tính từ lượt hợp lệ theo mức CPM nội bộ. Đây chưa phải tiền quảng cáo đã được mạng quảng cáo xác nhận và chưa thể rút.</p></div><div class="revenue-number"><small>Ước tính</small><b id="estimatedRevenue">$0.0000</b><span id="publisherCpm">CPM $0.00</span></div></div></div>
+<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">REVENUE • DEMO</span><h2>Doanh thu ước tính</h2><p class="muted compact">Tính từ lượt hợp lệ theo mức CPM nội bộ. Đây chưa phải tiền quảng cáo đã được mạng quảng cáo xác nhận và chưa thể rút.</p></div><div class="revenue-number"><small>Ước tính</small><b id="estimatedRevenue">0 ₫</b><span id="publisherCpm">CPM 0 ₫</span></div></div></div>
 
 <div class="panel" id="analytics">
   <div class="row-between"><div><h2>7 ngày gần nhất</h2><p class="muted compact">Lượt mở và lượt hợp lệ theo ngày.</p></div><span id="weekSummary" class="pill">0 lượt</span></div>
@@ -16,4 +16,4 @@
 
 <div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=4"></script><script src="app.js?v=4"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=5"></script><script src="app.js?v=5"></script></body></html>
