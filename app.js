@@ -81,10 +81,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=11";
+          if(data.session) location.href="dashboard.html?v=12";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=11";
+          if(error) throw error; location.href="dashboard.html?v=12";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -136,8 +136,10 @@
       return;
     }
 
-    $("walletBalance").textContent=fmtVnd(wallet?.balance_vnd);
+    $("walletBalance").textContent=fmtVnd(wallet?.available_vnd ?? wallet?.balance_vnd);
     $("walletLifetime").textContent=fmtVnd(wallet?.lifetime_earned_vnd);
+    if($("walletPending")) $("walletPending").textContent=fmtVnd(wallet?.pending_vnd);
+    if($("walletApproved")) $("walletApproved").textContent=fmtVnd(wallet?.approved_vnd);
     $("walletEarnedVisits").textContent=Number(wallet?.earned_visits||0);
     $("publisherCpm").textContent=`CPM hiện tại ${fmtVnd(wallet?.current_cpm_vnd)}`;
 
@@ -377,14 +379,14 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=11";return}
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=12";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
       sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
       sb.rpc("lynkora_admin_wallet_summary"),
-      sb.rpc("lynkora_admin_user_balances"),
+      sb.rpc("lynkora_admin_user_wallets"),
       sb.rpc("lynkora_admin_fraud_logs",{p_limit:100}),
       sb.rpc("lynkora_admin_withdrawals",{p_limit:100}),
       sb.rpc("lynkora_admin_withdrawal_config")
@@ -396,7 +398,10 @@
     $("admValid").textContent=stats?.valid_clicks_count??0;
     if($("admInvalid")) $("admInvalid").textContent=stats?.invalid_clicks_count??0;
     if($("cpmInput")) $("cpmInput").value=Math.round(Number(wallet?.current_cpm_vnd||0));
-    if($("adminWalletBalance")) $("adminWalletBalance").textContent=fmtVnd(wallet?.total_balance_vnd);
+    if($("adminWalletEarned")) $("adminWalletEarned").textContent=fmtVnd(wallet?.total_earned_vnd);
+    if($("adminWalletPending")) $("adminWalletPending").textContent=fmtVnd(wallet?.total_pending_vnd);
+    if($("adminWalletApproved")) $("adminWalletApproved").textContent=fmtVnd(wallet?.total_approved_vnd);
+    if($("adminWalletBalance")) $("adminWalletBalance").textContent=fmtVnd(wallet?.total_available_vnd ?? wallet?.total_balance_vnd);
     if($("adminWalletVisits")) $("adminWalletVisits").textContent=Number(wallet?.earned_visits||0);
 
     const balanceRows=balances||[];
@@ -405,11 +410,19 @@
       <td>${esc(x.email||"—")}</td>
       <td>${esc(x.display_name||"—")}</td>
       <td>${Number(x.earned_visits||0)}</td>
-      <td><b>${fmtVnd(x.balance_vnd)}</b></td>
-    </tr>`).join("")||'<tr><td colspan="4">Chưa có dữ liệu.</td></tr>';
+      <td>${fmtVnd(x.lifetime_earned_vnd)}</td>
+      <td>${fmtVnd(x.pending_vnd)}</td>
+      <td>${fmtVnd(x.approved_vnd)}</td>
+      <td><b>${fmtVnd(x.available_vnd)}</b></td>
+    </tr>`).join("")||'<tr><td colspan="7">Chưa có dữ liệu.</td></tr>';
     if($("walletUsersCards")) $("walletUsersCards").innerHTML=balanceRows.map(x=>`<article class="mobile-admin-card">
-      <div class="row-between gap"><div><b>${esc(x.display_name||"Không tên")}</b><small>${esc(x.email||"—")}</small></div><b>${fmtVnd(x.balance_vnd)}</b></div>
-      <small>${Number(x.earned_visits||0)} lượt đã ghi doanh thu</small>
+      <div class="row-between gap"><div><b>${esc(x.display_name||"Không tên")}</b><small>${esc(x.email||"—")}</small></div><b>${fmtVnd(x.available_vnd)}</b></div>
+      <div class="mini-metrics wallet-card-metrics">
+        <span><b>${fmtVnd(x.lifetime_earned_vnd)}</b><small>Tổng thu nhập</small></span>
+        <span><b>${fmtVnd(x.pending_vnd)}</b><small>Pending</small></span>
+        <span><b>${fmtVnd(x.approved_vnd)}</b><small>Approved</small></span>
+      </div>
+      <small>${Number(x.earned_visits||0)} lượt đã ghi doanh thu • Khả dụng ở góc phải</small>
     </article>`).join("")||'<p class="muted">Chưa có dữ liệu.</p>';
 
     renderDailyChart($("adminDailyChart"),daily,$("adminWeekSummary"));
