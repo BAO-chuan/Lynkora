@@ -1,34 +1,35 @@
-LYNKORA v1.11 — LINK ANALYTICS
+LYNKORA v1.12 — ADSTERRA SMARTLINK
 
-TÍNH NĂNG
-- Thống kê riêng từng link:
-  + lượt mở
-  + lượt hợp lệ
-  + lượt không hợp lệ
-  + tỷ lệ hợp lệ
-  + doanh thu đã ghi
-- Chọn từng link để xem biểu đồ 7 ngày.
-- Biểu đồ chi tiết hiển thị lượt mở / hợp lệ và tổng doanh thu 7 ngày.
+MỤC TIÊU
+- Tích hợp Smartlink Adsterra vào go.html theo cách tối thiểu, dễ hoàn tác.
+- Quảng cáo mở ở tab mới.
+- Nút "Tiếp tục đến liên kết" và anti-fraud hiện tại giữ nguyên.
+- Không tự động chuyển người dùng sang quảng cáo.
+- Không ép người dùng phải mở quảng cáo.
+- Không cộng tiền Lynkora chỉ vì người dùng mở quảng cáo.
+- Không đổi SQL.
 - Không đổi Edge Functions.
-- Không đổi wallet, payout profile hay withdrawal logic.
+- Không đổi app.js, dashboard.html, admin.html hay config.js.
+
+SMARTLINK ĐANG DÙNG
+https://www.profitableratecpmnetwork.com/kg2wk57xit?key=1f9fd32078ba3a0ec46a5552571670b9
 
 CÀI ĐẶT
-1. Supabase > SQL Editor > New query.
-2. Chạy toàn bộ Lynkora-v1.11.sql SAU v1.10.
-3. GitHub ghi đè 4 file:
-   - dashboard.html
-   - admin.html
-   - app.js
-   - styles.css
-4. config.js KHÔNG CẦN thay.
-5. go.html đổi cache:
-   <script src="app.js?v=13"></script>
-6. Mở thử:
-   dashboard.html?v=13
-   admin.html?v=13
+1) GitHub: ghi đè go.html và styles.css.
+2) Không chạy SQL.
+3) Không deploy lại Edge Functions.
+4) Không thay app.js/config.js.
+5) Mở thử một short link Lynkora.
+6) Kiểm tra:
+   - Có thẻ "QUẢNG CÁO ĐỐI TÁC".
+   - "Mở quảng cáo" mở tab mới.
+   - Sau 5 giây, nút "Tiếp tục đến liên kết" vẫn hoạt động bình thường.
+   - Link đích không bị thay bằng Smartlink.
 
-KIỂM TRA
-- Dashboard có panel "Hiệu suất từng link".
-- Mỗi link hiện Opens / Valid / Invalid / Valid rate / Revenue.
-- Chọn link khác trong ô chọn hoặc bấm "7 ngày" để đổi biểu đồ.
-- Nút Làm mới cập nhật cả analytics.
+CACHE
+- styles.css trên go.html: v14
+- app.js/config.js vẫn dùng v13 vì không sửa.
+
+LƯU Ý
+- Doanh thu hiển thị trong Adsterra mới là số liệu của Adsterra.
+- Wallet/CPM nội bộ Lynkora hiện vẫn độc lập với doanh thu Adsterra.
