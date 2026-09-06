@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=19"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=21"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=17">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
 <main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><button class="lynkora-nav" type="button" data-view="about">ⓘ Giới thiệu</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
-<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.20</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.21</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel"><span class="eyebrow">QUICK ACCESS • v1.19</span><h2>Chọn mục cần thao tác</h2><p class="muted compact">Dashboard đã được chia thành từng khu vực riêng. Dùng menu bên trái hoặc thanh điều hướng phía dưới trên điện thoại.</p></div></div>
@@ -99,9 +99,68 @@
 </div>
 
 <div class="lynkora-view" data-view-panel="links">
-<div class="panel" id="create"><h2>Tạo link mới</h2><form id="shortenForm" class="shorten"><input id="targetUrl" type="url" required placeholder="https://example.com/..."><button class="primary" type="submit">Rút gọn</button></form><div id="createMsg" class="msg"></div></div>
+<div class="panel" id="create">
+  <div class="row-between">
+    <div><span class="eyebrow">ADVANCED LINKS • v1.21</span><h2>Tạo link mới</h2><p class="muted compact">Có thể đặt alias riêng, ngày hết hạn và giới hạn lượt mở. Các tùy chọn đều có thể để trống.</p></div>
+  </div>
+  <form id="shortenForm" class="advanced-link-form">
+    <label class="advanced-link-full">URL đích
+      <input id="targetUrl" type="url" required placeholder="https://example.com/...">
+    </label>
+    <label>Alias tùy chỉnh
+      <input id="customAlias" type="text" minlength="3" maxlength="32" pattern="[A-Za-z0-9_-]{3,32}" placeholder="ví dụ: tai-lieu">
+      <small>3–32 ký tự: chữ, số, - hoặc _</small>
+    </label>
+    <label>Ngày hết hạn
+      <input id="linkExpiresAt" type="datetime-local">
+      <small>Để trống nếu không hết hạn.</small>
+    </label>
+    <label>Giới hạn lượt mở
+      <input id="linkMaxClicks" type="number" min="1" max="10000000" step="1" placeholder="Không giới hạn">
+      <small>Tính theo tổng lượt mở link.</small>
+    </label>
+    <div class="advanced-link-submit">
+      <button class="primary" type="submit">Tạo link</button>
+    </div>
+  </form>
+  <div id="createMsg" class="msg"></div>
+</div>
 
-<div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
+<div class="panel" id="links"><div class="row-between"><div><span class="eyebrow">LINK MANAGER • v1.21</span><h2>Link của tôi</h2><p class="muted compact">Xem chi tiết, QR Code, sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
+
+<div id="linkDetailModal" class="lynkora-modal hidden" role="dialog" aria-modal="true" aria-labelledby="linkDetailModalTitle">
+  <div class="lynkora-modal-card">
+    <div class="row-between">
+      <div><span class="eyebrow">LINK DETAIL • v1.21</span><h2 id="linkDetailModalTitle">Chi tiết link</h2></div>
+      <button id="closeLinkDetailBtn" class="ghost tiny" type="button">Đóng</button>
+    </div>
+    <div class="link-detail-grid">
+      <div class="link-detail-info">
+        <div class="detail-line"><small>Mã / Alias</small><b id="detailCode">—</b></div>
+        <div class="detail-line"><small>Short URL</small><a id="detailShortUrl" href="#" target="_blank" rel="noopener">—</a></div>
+        <div class="detail-line"><small>URL đích</small><span id="detailTargetUrl">—</span></div>
+        <div class="detail-line"><small>Trạng thái</small><span id="detailStatus">—</span></div>
+        <div class="detail-line"><small>Lượt mở / hợp lệ</small><span id="detailClicks">—</span></div>
+        <div class="detail-line"><small>Ngày tạo</small><span id="detailCreatedAt">—</span></div>
+      </div>
+      <div class="qr-box">
+        <img id="detailQrImage" alt="QR Code của link Lynkora" width="220" height="220">
+        <button id="detailCopyBtn" class="ghost" type="button">Sao chép link</button>
+      </div>
+    </div>
+    <form id="linkOptionsForm" class="link-options-form">
+      <label>Ngày hết hạn
+        <input id="detailExpiresAt" type="datetime-local">
+      </label>
+      <label>Giới hạn lượt mở
+        <input id="detailMaxClicks" type="number" min="1" max="10000000" step="1" placeholder="Không giới hạn">
+      </label>
+      <button class="primary" type="submit">Lưu tùy chọn</button>
+    </form>
+    <p class="muted compact">Alias không đổi sau khi tạo để tránh làm hỏng link đã chia sẻ. Muốn alias khác, hãy tạo link mới.</p>
+    <div id="linkOptionsMsg" class="msg"></div>
+  </div>
+</div>
 </div>
 
 <div class="lynkora-view" data-view-panel="account">
@@ -204,4 +263,4 @@
   window.addEventListener("hashchange",()=>showView(location.hash.slice(1),false));
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=21"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=22"></script></body></html>

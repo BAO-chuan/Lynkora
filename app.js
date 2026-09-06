@@ -25,6 +25,17 @@
   const payoutMethodLabel = method => ({
     bank:"Ngân hàng", momo:"MoMo", zalopay:"ZaloPay", other:"Khác"
   })[method] || method || "—";
+  const toLocalInput = value => {
+    if(!value) return "";
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    const pad=n=>String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const inputToIso = value => value ? new Date(value).toISOString() : null;
+  const qrUrl = value => `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(value)}`;
+  let publisherLinks=[];
+  let activeDetailCode=null;
   const clientKey = () => {
     let k=localStorage.getItem("lynkora_client_key");
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
@@ -432,6 +443,7 @@
     const {data,error}=await sb.rpc("lynkora_my_links");
     if(error){$("linksList").innerHTML=`<p class="msg">${esc(error.message)}</p>`;return}
     const rows=data||[];
+    publisherLinks=rows;
     const clicks=rows.reduce((a,x)=>a+Number(x.click_count||0),0);
     const valid=rows.reduce((a,x)=>a+Number(x.valid_click_count||0),0);
     $("totalLinks").textContent=rows.length;
@@ -439,21 +451,69 @@
     $("validClicks").textContent=valid;
     if($("validRate")) $("validRate").textContent=`${pct(valid,clicks)}%`;
     if($("invalidClicks")) $("invalidClicks").textContent=Math.max(0,clicks-valid);
+
     $("linksList").innerHTML=rows.length?rows.map(x=>{
       const url=shortUrl(x.code), opens=Number(x.click_count||0), good=Number(x.valid_click_count||0);
-      return `<article class="link-row ${x.is_active?'':'disabled-link'}" data-code="${esc(x.code)}">
+      const expired=x.expires_at && new Date(x.expires_at).getTime()<=Date.now();
+      const maxClicks=x.max_clicks==null?null:Number(x.max_clicks);
+      const limitReached=maxClicks!=null && opens>=maxClicks;
+      const effectiveActive=Boolean(x.is_active) && !expired && !limitReached;
+      const stateText=!x.is_active?"ĐÃ TẮT":expired?"HẾT HẠN":limitReached?"ĐẠT GIỚI HẠN":"ĐANG BẬT";
+      const optionBits=[
+        x.expires_at?`⏳ ${fmtDate(x.expires_at)}`:"⏳ Không hết hạn",
+        maxClicks!=null?`🔢 ${opens.toLocaleString("vi-VN")}/${maxClicks.toLocaleString("vi-VN")} lượt`:"🔢 Không giới hạn"
+      ];
+      return `<article class="link-row ${effectiveActive?'':'disabled-link'}" data-code="${esc(x.code)}">
         <div class="link-main">
-          <div class="code-line"><b>${esc(x.code)}</b><span class="status ${x.is_active?'on':'off'}">${x.is_active?'ĐANG BẬT':'ĐÃ TẮT'}</span></div>
+          <div class="code-line"><b>${esc(x.code)}</b><span class="status ${effectiveActive?'on':'off'}">${esc(stateText)}</span></div>
           <small class="target-preview">${esc(x.target_url)}</small><small class="short-preview">${esc(url)}</small>
           <div class="link-meta"><span>📅 ${fmtDate(x.created_at)}</span><span>✓ ${pct(good,opens)}% hợp lệ</span></div>
+          <div class="link-v121-meta">${optionBits.map(v=>`<span>${v}</span>`).join("")}</div>
         </div>
         <div class="link-actions"><span>${opens} mở • ${good} hợp lệ</span>
+          <button class="ghost tiny" data-action="detail">Chi tiết / QR</button>
           <button class="ghost tiny" data-action="copy" data-url="${esc(url)}">Sao chép</button>
           <a class="primary tiny" href="${esc(url)}">Mở</a>
           <button class="ghost tiny" data-action="toggle" data-active="${x.is_active?'1':'0'}">${x.is_active?'Tắt':'Bật'}</button>
           <button class="danger tiny" data-action="delete">Xóa</button>
         </div></article>`;
     }).join(""):`<p class="muted">Bạn chưa có link nào.</p>`;
+
+    if(activeDetailCode && !$("linkDetailModal")?.classList.contains("hidden")){
+      const refreshed=publisherLinks.find(x=>x.code===activeDetailCode);
+      if(refreshed) openLinkDetail(refreshed);
+    }
+  }
+
+  function openLinkDetail(link){
+    if(!link || !$("linkDetailModal")) return;
+    activeDetailCode=link.code;
+    const url=shortUrl(link.code);
+    const opens=Number(link.click_count||0), good=Number(link.valid_click_count||0);
+    const expired=link.expires_at && new Date(link.expires_at).getTime()<=Date.now();
+    const maxClicks=link.max_clicks==null?null:Number(link.max_clicks);
+    const limitReached=maxClicks!=null && opens>=maxClicks;
+    const state=!link.is_active?"Đã tắt":expired?"Đã hết hạn":limitReached?"Đã đạt giới hạn":"Đang bật";
+    $("detailCode").textContent=link.code;
+    $("detailShortUrl").textContent=url;
+    $("detailShortUrl").href=url;
+    $("detailTargetUrl").textContent=link.target_url;
+    $("detailStatus").textContent=state;
+    $("detailClicks").textContent=`${opens.toLocaleString("vi-VN")} mở • ${good.toLocaleString("vi-VN")} hợp lệ`;
+    $("detailCreatedAt").textContent=fmtDate(link.created_at);
+    $("detailExpiresAt").value=toLocalInput(link.expires_at);
+    $("detailMaxClicks").value=maxClicks==null?"":String(maxClicks);
+    $("detailQrImage").src=qrUrl(url);
+    $("detailCopyBtn").dataset.url=url;
+    $("linkOptionsMsg").textContent="";
+    $("linkDetailModal").classList.remove("hidden");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeLinkDetail(){
+    activeDetailCode=null;
+    $("linkDetailModal")?.classList.add("hidden");
+    document.body.classList.remove("modal-open");
   }
 
   if ($("shortenForm")) {
@@ -542,13 +602,25 @@
     $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
-      const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
+      const url=$("targetUrl").value.trim();
+      const alias=$("customAlias")?.value.trim().toLowerCase()||"";
+      const expiresValue=$("linkExpiresAt")?.value||"";
+      const maxValue=$("linkMaxClicks")?.value||"";
+      const btn=$("shortenForm").querySelector("button[type='submit']");
       btn.disabled=true;
       try{
-        const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
+        const expiresAt=expiresValue?inputToIso(expiresValue):null;
+        const maxClicks=maxValue?Number(maxValue):null;
+        const {data,error}=await sb.rpc("lynkora_create_advanced_link",{
+          p_target_url:url,
+          p_alias:alias||null,
+          p_expires_at:expiresAt,
+          p_max_clicks:maxClicks
+        });
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        $("shortenForm").reset();
+        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -557,6 +629,11 @@
       const row=btn.closest(".link-row"), code=row?.dataset.code; if(!code) return;
       const action=btn.dataset.action;
       if(action==="copy") return copyText(btn.dataset.url,btn);
+      if(action==="detail"){
+        const link=publisherLinks.find(x=>x.code===code);
+        if(link) openLinkDetail(link);
+        return;
+      }
       btn.disabled=true;
       try{
         if(action==="toggle"){
@@ -568,9 +645,36 @@
           if(!confirm(`Xóa link ${code}? Dữ liệu lượt truy cập của link này cũng sẽ bị xóa.`)){btn.disabled=false;return}
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
+          if(activeDetailCode===code) closeLinkDetail();
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
+    };
+
+    $("closeLinkDetailBtn")?.addEventListener("click",closeLinkDetail);
+    $("linkDetailModal")?.addEventListener("click",e=>{if(e.target===$("linkDetailModal")) closeLinkDetail()});
+    document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("linkDetailModal")?.classList.contains("hidden")) closeLinkDetail()});
+    $("detailCopyBtn")?.addEventListener("click",e=>copyText(e.currentTarget.dataset.url,e.currentTarget));
+
+    if($("linkOptionsForm")) $("linkOptionsForm").onsubmit=async e=>{
+      e.preventDefault();
+      if(!activeDetailCode) return;
+      const btn=$("linkOptionsForm").querySelector("button[type='submit']");
+      btn.disabled=true;
+      $("linkOptionsMsg").textContent="Đang lưu...";
+      try{
+        const expiresValue=$("detailExpiresAt").value;
+        const maxValue=$("detailMaxClicks").value;
+        const {error}=await sb.rpc("lynkora_update_my_link_options",{
+          p_code:activeDetailCode,
+          p_expires_at:expiresValue?inputToIso(expiresValue):null,
+          p_max_clicks:maxValue?Number(maxValue):null
+        });
+        if(error) throw error;
+        $("linkOptionsMsg").textContent="Đã cập nhật tùy chọn link.";
+        await Promise.all([loadLinks(),loadLinkAnalytics()]);
+      }catch(ex){$("linkOptionsMsg").textContent=errText(ex)}
+      finally{btn.disabled=false}
     };
   }
 

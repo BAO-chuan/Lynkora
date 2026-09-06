@@ -231,3 +231,42 @@
   .revenue-control-form{grid-template-columns:1fr}
   .revenue-control-form .primary{width:100%}
 }
+
+/* =========================================================
+   LYNKORA v1.21 — Advanced Links
+========================================================= */
+.advanced-link-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.advanced-link-form label{margin:0;display:grid;gap:6px}
+.advanced-link-form label>small{color:var(--muted);font-size:11px;font-weight:500}
+.advanced-link-form input{margin:0}
+.advanced-link-full{grid-column:1/-1}
+.advanced-link-submit{display:flex;align-items:end}
+.advanced-link-submit .primary{width:100%;min-height:47px}
+.link-v121-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.link-v121-meta span{font-size:11px;color:#9eb0c8;background:#0c1a2d;border:1px solid #20334f;border-radius:999px;padding:4px 8px}
+.lynkora-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:#020712c9;backdrop-filter:blur(7px)}
+.lynkora-modal-card{width:min(780px,100%);max-height:min(88vh,900px);overflow:auto;background:linear-gradient(180deg,#0e1d31,#091625);border:1px solid #29415f;border-radius:18px;padding:22px;box-shadow:0 35px 90px #000b}
+body.modal-open{overflow:hidden}
+.link-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;margin-top:16px}
+.link-detail-info{display:grid;gap:9px}
+.detail-line{background:#081421;border:1px solid #1e314a;border-radius:10px;padding:11px 12px;min-width:0}
+.detail-line small{display:block;color:var(--muted);margin-bottom:3px}
+.detail-line b,.detail-line span,.detail-line a{display:block;overflow-wrap:anywhere}
+.detail-line a{color:#5fd7ff}
+.qr-box{display:grid;align-content:start;justify-items:center;gap:10px;background:#081421;border:1px solid #1e314a;border-radius:12px;padding:14px}
+.qr-box img{display:block;width:220px;max-width:100%;height:auto;background:#fff;border-radius:10px;padding:6px}
+.qr-box .ghost{width:100%}
+.link-options-form{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-top:18px;padding-top:18px;border-top:1px solid #1d3048}
+.link-options-form label{margin:0}
+.link-options-form input{margin-top:7px}
+.link-options-form .primary{min-height:47px}
+@media(max-width:760px){
+  .advanced-link-form{grid-template-columns:1fr}
+  .advanced-link-full{grid-column:auto}
+  .link-detail-grid{grid-template-columns:1fr}
+  .qr-box{order:2}
+  .link-options-form{grid-template-columns:1fr}
+  .link-options-form .primary{width:100%}
+  .lynkora-modal{padding:10px;align-items:end}
+  .lynkora-modal-card{max-height:92vh;border-radius:18px 18px 10px 10px;padding:16px}
+}
