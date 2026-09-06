@@ -14,6 +14,11 @@
   const shortUrl = code => `${location.origin}${basePath}go.html?c=${encodeURIComponent(code)}`;
   const pct = (a,b) => b > 0 ? Math.round((a/b)*100) : 0;
   const fmtVnd = n => `${Math.round(Number(n||0)).toLocaleString("vi-VN")} ₫`;
+  const fraudReasonLabel = reason => ({
+    rapid_repeat: "Lặp nhanh",
+    too_fast: "Quá nhanh",
+    expired: "Hết hạn"
+  })[reason] || reason || "Khác";
   const clientKey = () => {
     let k=localStorage.getItem("lynkora_client_key");
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
@@ -70,10 +75,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=7";
+          if(data.session) location.href="dashboard.html?v=8";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=7";
+          if(error) throw error; location.href="dashboard.html?v=8";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -238,15 +243,16 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=7";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=8";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re},{data:fraud,error:fe}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
       sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
-      sb.rpc("lynkora_admin_revenue_summary")
+      sb.rpc("lynkora_admin_revenue_summary"),
+      sb.rpc("lynkora_admin_fraud_logs",{p_limit:100})
     ]);
-    if(se||ue||le||de||re){$("adminMsg").textContent=errText(se||ue||le||de||re);return}
+    if(se||ue||le||de||re||fe){$("adminMsg").textContent=errText(se||ue||le||de||re||fe);return}
     $("admUsers").textContent=stats?.users_count??0;
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
@@ -262,6 +268,35 @@
     const linkRows=(links||[]);
     $("adminLinksBody").innerHTML=linkRows.map(x=>`<tr data-id="${esc(x.link_id)}"><td><b>${esc(x.code)}</b></td><td>${esc(x.owner_email)}</td><td class="url-cell">${esc(x.target_url)}</td><td><span class="status ${x.is_active?"on":"off"}">${x.is_active?"Bật":"Tắt"}</span></td><td>${Number(x.click_count||0)}</td><td>${Number(x.valid_click_count||0)}</td><td><div class="table-actions"><button class="ghost tiny" data-admin-action="toggle" data-active="${x.is_active?'1':'0'}">${x.is_active?'Tắt':'Bật'}</button><button class="danger tiny" data-admin-action="delete">Xóa</button></div></td></tr>`).join("")||'<tr><td colspan="7">Chưa có link.</td></tr>';
     $("adminLinksCards").innerHTML=linkRows.map(adminLinkCard).join("")||'<p class="muted">Chưa có link.</p>';
+
+    const fraudRows=(fraud||[]);
+    const reasonCounts={rapid_repeat:0,too_fast:0,expired:0,other:0};
+    fraudRows.forEach(x=>{
+      if(reasonCounts[x.reject_reason]!==undefined) reasonCounts[x.reject_reason]++;
+      else reasonCounts.other++;
+    });
+    if($("fraudRapid")) $("fraudRapid").textContent=reasonCounts.rapid_repeat;
+    if($("fraudTooFast")) $("fraudTooFast").textContent=reasonCounts.too_fast;
+    if($("fraudExpired")) $("fraudExpired").textContent=reasonCounts.expired;
+    if($("fraudOther")) $("fraudOther").textContent=reasonCounts.other;
+    if($("fraudRatePill")) {
+      const total=Number(stats?.clicks_count||0), invalid=Number(stats?.invalid_clicks_count||0);
+      $("fraudRatePill").textContent=`${pct(invalid,total)}% bị từ chối`;
+    }
+
+    if($("fraudBody")) $("fraudBody").innerHTML=fraudRows.map(x=>`<tr>
+      <td>${fmtDate(x.opened_at)}</td>
+      <td><b>${esc(x.code)}</b></td>
+      <td>${esc(x.owner_email||"—")}</td>
+      <td><span class="status off">${esc(fraudReasonLabel(x.reject_reason))}</span></td>
+      <td class="client-cell">${esc(x.client_key||"—")}</td>
+    </tr>`).join("")||'<tr><td colspan="5">Chưa có lượt bị từ chối.</td></tr>';
+
+    if($("fraudCards")) $("fraudCards").innerHTML=fraudRows.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap"><div><b>${esc(x.code)}</b><small>${fmtDate(x.opened_at)}</small></div><span class="status off">${esc(fraudReasonLabel(x.reject_reason))}</span></div>
+      <small>${esc(x.owner_email||"—")}</small>
+      <small class="client-preview">Client: ${esc(x.client_key||"—")}</small>
+    </article>`).join("")||'<p class="muted">Chưa có lượt bị từ chối.</p>';
   }
 
   async function handleAdminAction(e){

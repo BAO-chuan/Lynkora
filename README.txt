@@ -1,28 +1,19 @@
-LYNKORA v1.5 — EDGE VERIFICATION
+LYNKORA v1.6 — ANTI-FRAUD ADMIN LOGS
 
-QUAN TRỌNG: v1.5 có thêm Supabase Edge Functions, không chỉ SQL + GitHub Pages.
+Mới:
+- Admin xem tối đa 100 lượt bị từ chối gần nhất.
+- Hiện thời gian, mã link, chủ sở hữu, lý do, client key.
+- Thống kê nhanh rapid_repeat / too_fast / expired / khác.
+- Tỷ lệ bị từ chối trên tổng lượt mở.
+- Mobile hiển thị dạng card.
 
-A. SUPABASE SQL
-1) Chạy Lynkora-v1.5.sql.
+Cập nhật:
+1) Supabase SQL Editor: chạy Lynkora-v1.6.sql sau v1.5.
+2) GitHub ghi đè: admin.html, app.js, styles.css.
+3) dashboard.html chỉ tăng version/cache; có thể ghi đè để đồng bộ.
+4) go.html KHÔNG cần đổi: vẫn app.js?v=7 được nếu bạn chỉ quan tâm go flow,
+   nhưng để đồng bộ cache toàn site nên đổi go.html -> app.js?v=8.
+5) Không cần deploy lại 2 Edge Functions.
+6) Test admin.html?v=8.
 
-B. EDGE FUNCTIONS
-Deploy 2 function:
-- supabase/functions/lynkora-open/index.ts
-- supabase/functions/lynkora-complete/index.ts
-Cả hai là public endpoint nên verify_jwt=false, nhưng chúng chỉ gọi DB bằng secret key ở môi trường server.
-KHÔNG copy secret/service_role vào GitHub hoặc app.js.
-
-CLI:
-supabase login
-supabase link --project-ref kchuozpzvletryzfotbq
-supabase functions deploy lynkora-open
-supabase functions deploy lynkora-complete
-
-C. GITHUB
-Ghi đè dashboard.html, admin.html, app.js, styles.css.
-Sửa go.html để nạp app.js?v=7.
-
-D. TEST
-- Lượt đầu: chờ >=5 giây -> valid.
-- Mở lại cùng link trong <60 giây -> rejected.
-- Dashboard/Admin vẫn chạy.
+v1.6 chỉ thêm quan sát/log Admin, không thay cơ chế anti-fraud v1.5.

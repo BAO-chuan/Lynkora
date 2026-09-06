@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=7"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=8"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=3">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.5</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.6</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article><article><small>Bị từ chối</small><b id="admInvalid">0</b></article></div>
 <div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">REVENUE CONFIG</span><h2>Mức CPM nội bộ</h2><p class="muted compact">Dùng để ước tính doanh thu demo từ lượt hợp lệ. Không phải số tiền do mạng quảng cáo xác nhận.</p></div><form id="cpmForm" class="cpm-form"><label>VND / 1.000 lượt hợp lệ<input id="cpmInput" type="number" min="0" max="100000000" step="1000" required></label><button class="primary" type="submit">Lưu CPM</button></form></div><div class="revenue-admin"><span>Ước tính toàn hệ thống</span><b id="adminEstimatedRevenue">0 ₫</b></div></div>
@@ -21,6 +21,31 @@
     <div class="table-scroll desktop-only"><table><thead><tr><th>Mã</th><th>Chủ sở hữu</th><th>URL đích</th><th>Trạng thái</th><th>Mở</th><th>Hợp lệ</th><th>Thao tác</th></tr></thead><tbody id="adminLinksBody"><tr><td colspan="7">Đang tải...</td></tr></tbody></table></div>
     <div id="adminLinksCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
   </div>
+  <div class="panel" id="fraudLogs">
+    <div class="row-between">
+      <div>
+        <span class="eyebrow">ANTI-FRAUD</span>
+        <h2>Nhật ký lượt bị từ chối</h2>
+        <p class="muted compact">Hiển thị tối đa 100 lượt gần nhất cùng lý do từ chối.</p>
+      </div>
+      <span id="fraudRatePill" class="pill">0% bị từ chối</span>
+    </div>
+
+    <div class="fraud-reason-stats">
+      <article><small>Lặp nhanh</small><b id="fraudRapid">0</b></article>
+      <article><small>Quá nhanh</small><b id="fraudTooFast">0</b></article>
+      <article><small>Hết hạn</small><b id="fraudExpired">0</b></article>
+      <article><small>Khác</small><b id="fraudOther">0</b></article>
+    </div>
+
+    <div class="table-scroll desktop-only">
+      <table>
+        <thead><tr><th>Thời gian</th><th>Mã link</th><th>Chủ sở hữu</th><th>Lý do</th><th>Client</th></tr></thead>
+        <tbody id="fraudBody"><tr><td colspan="5">Đang tải...</td></tr></tbody>
+      </table>
+    </div>
+    <div id="fraudCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
+  </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=7"></script><script src="app.js?v=7"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=8"></script><script src="app.js?v=8"></script></body></html>
