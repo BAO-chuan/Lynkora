@@ -1,7 +1,7 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=16"></head>
-<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=16">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=17"></head>
+<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=17">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.14</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.15</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article><article><small>Bị từ chối</small><b id="admInvalid">0</b></article></div>
 
@@ -72,7 +72,33 @@
     <div id="withdrawAdminCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
   </div>
 
-  <div class="panel" id="fraudLogs">
+  
+  <div class="panel" id="revenueCyclesPanel">
+    <div class="row-between">
+      <div>
+        <span class="eyebrow">REVENUE CYCLES • v1.15</span>
+        <h2>Chốt doanh thu theo chu kỳ</h2>
+        <p class="muted compact">Mỗi kỳ dùng đúng doanh thu và valid traffic trong khoảng thời gian đó. Earnings chỉ phát sinh khi Admin chốt kỳ.</p>
+      </div>
+      <span id="cycleCountPill" class="pill">0 chu kỳ</span>
+    </div>
+    <form id="cycleForm" class="payout-profile-form">
+      <label>Tên chu kỳ<input id="cycleLabel" maxlength="80" placeholder="Ví dụ: Tháng 09/2026" required></label>
+      <label>Bắt đầu<input id="cycleStart" type="datetime-local" required></label>
+      <label>Kết thúc<input id="cycleEnd" type="datetime-local" required></label>
+      <label>Doanh thu xác nhận (VND)<input id="cycleRevenue" type="number" min="0" step="1000" value="0" required></label>
+      <label>Chia Publisher (%)<input id="cycleShare" type="number" min="0" max="100" step="0.01" value="70" required></label>
+      <button class="primary" type="submit">Tạo chu kỳ</button>
+    </form>
+    <div id="cycleMsg" class="msg"></div>
+    <div class="table-scroll desktop-only">
+      <table><thead><tr><th>Chu kỳ</th><th>Doanh thu</th><th>Publisher</th><th>Valid</th><th>CPM</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+      <tbody id="cyclesBody"><tr><td colspan="7">Đang tải...</td></tr></tbody></table>
+    </div>
+    <div id="cyclesCards" class="mobile-card-list mobile-only"><p class="muted">Đang tải...</p></div>
+  </div>
+
+<div class="panel" id="fraudLogs">
     <div class="row-between">
       <div>
         <span class="eyebrow">ANTI-FRAUD</span>
@@ -99,4 +125,4 @@
   </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=16"></script><script src="app.js?v=16"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=17"></script><script src="app.js?v=17"></script></body></html>
