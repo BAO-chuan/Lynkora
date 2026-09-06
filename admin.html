@@ -1,44 +1,15 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=17"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=19"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=17">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.15</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.17</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article><article><small>Bị từ chối</small><b id="admInvalid">0</b></article></div>
 
-<div class="panel revenue-control-panel">
-  <div class="row-between revenue-control-head">
-    <div>
-      <span class="eyebrow">REVENUE CONTROL • v1.14</span>
-      <h2>Ngân sách Publisher</h2>
-      <p class="muted compact">Chỉ nhập doanh thu quảng cáo đã được Adsterra ghi nhận và bạn đã quy đổi sang VND. Hệ thống sẽ không ghi earnings mới vượt quá phần ngân sách dành cho Publisher.</p>
-    </div>
-    <span id="revenueControlStatus" class="pill">Đang tải...</span>
-  </div>
-
-  <form id="revenueControlForm" class="revenue-control-form">
-    <label>Doanh thu quảng cáo xác nhận (VND)
-      <input id="confirmedAdRevenueInput" type="number" min="0" max="1000000000000" step="1000" required>
-    </label>
-    <label>Chia cho Publisher (%)
-      <input id="publisherShareInput" type="number" min="0" max="100" step="1" required>
-    </label>
-    <label class="revenue-toggle">
-      <input id="earningsEnabledInput" type="checkbox">
-      <span>Bật ghi earnings mới</span>
-    </label>
-    <button class="primary" type="submit">Lưu Revenue Control</button>
-  </form>
-  <div id="revenueControlMsg" class="msg"></div>
-
-  <div class="revenue-admin revenue-control-summary">
-    <span><small>Ngân sách Publisher</small><b id="publisherBudgetValue">0 ₫</b></span>
-    <span><small>Đã ghi earnings</small><b id="recordedEarningsValue">0 ₫</b></span>
-    <span><small>Ngân sách còn lại</small><b id="remainingBudgetValue">0 ₫</b></span>
-    <span><small>Vượt ngân sách</small><b id="overBudgetValue">0 ₫</b></span>
-  </div>
-  <p class="fine">Revenue Control không tự đọc số dư Adsterra. Bạn chỉ cập nhật số doanh thu đã xác nhận. Khi công tắc tắt hoặc ngân sách hết, valid visit vẫn được xác minh nhưng không phát sinh earnings mới.</p>
+<div class="panel revenue-panel" id="publisherModelAdmin">
+  <div class="row-between"><div><span class="eyebrow">PUBLISHER EARNINGS MODEL • v1.17</span><h2>Phân bổ doanh thu thực tế</h2><p class="muted compact">Revenue Cycles là nguồn tính earnings chính thức: Admin nhập doanh thu quảng cáo đã xác nhận cho đúng kỳ, chọn tỷ lệ chia Publisher, rồi chốt sau khi kỳ kết thúc. Hệ thống chỉ phân bổ ngân sách của kỳ cho valid visits chưa từng được trả.</p></div><span id="publisherModelStatus" class="pill">Đang tải...</span></div>
+  <div class="revenue-admin wallet-admin-summary wallet-admin-v110"><span><small>Doanh thu đã chốt</small><b id="modelSettledRevenue">0 ₫</b></span><span><small>Đã dành Publisher</small><b id="modelPublisherBudget">0 ₫</b></span><span><small>Earnings đã ghi</small><b id="modelSettledEarnings">0 ₫</b></span><span><small>Phần Lynkora</small><b id="modelPlatformShare">0 ₫</b></span><span><small>Valid đã thanh toán</small><b id="modelPaidVisits">0</b></span></div>
+  <p class="fine">CPM hiển thị theo từng chu kỳ là CPM phân bổ của kỳ đó, không phải cam kết CPM cố định. Chu kỳ chưa chốt không làm tăng ví Publisher.</p>
 </div>
-<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">DYNAMIC CPM • v1.14</span><h2>CPM Publisher tự động</h2><p class="muted compact">CPM được tính từ doanh thu quảng cáo xác nhận × tỷ lệ chia Publisher ÷ tổng valid visits × 1.000. Earnings cũ không bị tính lại.</p></div><div class="revenue-number"><small>CPM hiện tại</small><b id="dynamicCpmValue">0 ₫</b><span id="dynamicValidVisits">0 valid visits</span></div></div><div class="revenue-admin wallet-admin-summary wallet-admin-v110"><span><small>Tổng thu nhập</small><b id="adminWalletEarned">0 ₫</b></span><span><small>Đang chờ rút</small><b id="adminWalletPending">0 ₫</b></span><span><small>Đã duyệt rút</small><b id="adminWalletApproved">0 ₫</b></span><span><small>Tổng khả dụng</small><b id="adminWalletBalance">0 ₫</b></span><span><small>Lượt ghi doanh thu</small><b id="adminWalletVisits">0</b></span></div></div>
   <div class="panel" id="withdrawConfig">
     <div class="row-between"><div><span class="eyebrow">WITHDRAWAL CONFIG</span><h2>Cấu hình rút tiền</h2><p class="muted compact">Thiết lập mức rút tối thiểu áp dụng cho mọi Publisher.</p></div><span id="adminMinWithdrawPill" class="pill">Tối thiểu 0 ₫</span></div>
     <form id="minWithdrawForm" class="cpm-form"><label>Rút tối thiểu (VND)<input id="minWithdrawInput" type="number" min="1000" max="1000000000" step="1000" required></label><button class="primary" type="submit">Lưu mức rút</button></form>
@@ -76,7 +47,7 @@
   <div class="panel" id="revenueCyclesPanel">
     <div class="row-between">
       <div>
-        <span class="eyebrow">REVENUE CYCLES • v1.15</span>
+        <span class="eyebrow">REVENUE CYCLES • v1.17</span>
         <h2>Chốt doanh thu theo chu kỳ</h2>
         <p class="muted compact">Mỗi kỳ dùng đúng doanh thu và valid traffic trong khoảng thời gian đó. Earnings chỉ phát sinh khi Admin chốt kỳ.</p>
       </div>
@@ -125,4 +96,4 @@
   </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=17"></script><script src="app.js?v=18"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=19"></script></body></html>

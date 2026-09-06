@@ -1,18 +1,17 @@
-LYNKORA v1.15 — REVENUE CYCLES
+LYNKORA v1.17 — PUBLISHER EARNINGS MODEL
 
-1. Chạy Lynkora-v1.15.sql trong Supabase SQL Editor.
-2. GitHub ghi đè:
-   - admin.html
-   - dashboard.html
-   - app.js
-3. Không thay styles.css, config.js, go.html.
-4. Không deploy lại Edge Functions.
-5. Cache mới: v17.
+1) Supabase SQL Editor: chạy Lynkora-v1.17.sql sau v1.15.
+2) GitHub: ghi đè đúng 3 file: admin.html, dashboard.html, app.js.
+3) Không sửa: go.html, styles.css, config.js, Edge Functions.
+4) Mở admin.html?v=19 và dashboard.html?v=19 để tránh cache Safari.
 
-v1.15 đổi cách ghi earnings:
-- Valid visit vẫn được anti-fraud xác minh như cũ.
-- Không cộng earnings ngay khi visit valid.
-- Admin tạo chu kỳ theo ngày/tháng, nhập doanh thu quảng cáo xác nhận và % Publisher.
-- Sau khi kỳ đã kết thúc, Admin bấm Chốt kỳ.
-- Hệ thống lấy đúng valid visits trong kỳ chưa từng được trả, tính CPM và ghi earnings một lần.
-- Earnings cũ giữ nguyên.
+Mô hình:
+- Valid visit không tự cộng tiền.
+- Admin tạo Revenue Cycle theo đúng kỳ.
+- Nhập doanh thu quảng cáo đã xác nhận và tỷ lệ Publisher.
+- Chỉ chốt sau khi kỳ kết thúc.
+- Khi chốt, earnings chỉ phân bổ cho valid visits trong kỳ chưa từng được trả.
+- CPM là kết quả phân bổ của từng kỳ, không phải mức cam kết cố định.
+- Earnings/withdrawals cũ được giữ nguyên.
+
+Lưu ý: v1.17 không tự đọc Adsterra API. Doanh thu xác nhận vẫn do Admin nhập thủ công.

@@ -81,10 +81,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=15";
+          if(data.session) location.href="dashboard.html?v=19";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=15";
+          if(error) throw error; location.href="dashboard.html?v=19";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -238,6 +238,19 @@
   }
 
 
+  async function loadPublisherModel(){
+    if(!$('publisherModelCard')) return;
+    const {data,error}=await sb.rpc('lynkora_my_publisher_model');
+    if(error){ if($('myModelStatus')) $('myModelStatus').textContent=errText(error); return; }
+    if($('myModelStatus')) { $('myModelStatus').textContent='Theo Revenue Cycles'; $('myModelStatus').classList.add('ok'); }
+    if($('mySettledCycles')) $('mySettledCycles').textContent=Number(data?.settled_cycles||0).toLocaleString('vi-VN');
+    if($('myPaidVisits')) $('myPaidVisits').textContent=Number(data?.paid_visits||0).toLocaleString('vi-VN');
+    if($('myCycleEarnings')) $('myCycleEarnings').textContent=fmtVnd(data?.cycle_earnings_vnd);
+    if($('myLastCycleCpm')) $('myLastCycleCpm').textContent=fmtVnd(data?.last_cycle_cpm_vnd);
+    if($('publisherCpm')) $('publisherCpm').textContent=`CPM kỳ gần nhất ${fmtVnd(data?.last_cycle_cpm_vnd)}`;
+  }
+
+
   async function loadPayoutProfile() {
     if(!$("payoutProfileForm")) return;
     const {data,error}=await sb.rpc("lynkora_my_payout_profile");
@@ -330,7 +343,7 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
     if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").onchange=()=>loadLinkDaily($("linkAnalyticsSelect").value);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
 
@@ -379,7 +392,7 @@
       }
     };
 
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -388,7 +401,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -409,7 +422,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
@@ -459,7 +472,7 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=15";return}
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=19";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce},{data:revctl,error:rce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
@@ -604,6 +617,18 @@
   }
 
   
+async function loadPublisherModelAdmin(){
+  if(!$('publisherModelAdmin')) return;
+  const {data,error}=await sb.rpc('lynkora_admin_publisher_model_summary');
+  if(error){ if($('publisherModelStatus')) $('publisherModelStatus').textContent=errText(error); return; }
+  if($('publisherModelStatus')) { $('publisherModelStatus').textContent='Revenue Cycles đang hoạt động'; $('publisherModelStatus').classList.add('ok'); }
+  if($('modelSettledRevenue')) $('modelSettledRevenue').textContent=fmtVnd(data?.settled_revenue_vnd);
+  if($('modelPublisherBudget')) $('modelPublisherBudget').textContent=fmtVnd(data?.publisher_budget_vnd);
+  if($('modelSettledEarnings')) $('modelSettledEarnings').textContent=fmtVnd(data?.settled_earnings_vnd);
+  if($('modelPlatformShare')) $('modelPlatformShare').textContent=fmtVnd(data?.platform_share_vnd);
+  if($('modelPaidVisits')) $('modelPaidVisits').textContent=Number(data?.paid_visits||0).toLocaleString('vi-VN');
+}
+
 async function loadRevenueCycles(){
   if(!$("cyclesBody") && !$("cyclesCards")) return;
   const {data,error}=await sb.rpc("lynkora_admin_revenue_cycles",{p_limit:24});
@@ -637,8 +662,9 @@ async function loadRevenueCycles(){
 if($("usersBody")){
     loadAdmin();
     loadRevenueCycles();
+    loadPublisherModelAdmin();
     $("adminLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
-    $("adminRefreshBtn").onclick=()=>Promise.all([loadAdmin(),loadRevenueCycles()]);
+    $("adminRefreshBtn").onclick=()=>Promise.all([loadAdmin(),loadRevenueCycles(),loadPublisherModelAdmin()]);
     
   if($("cycleForm")) $("cycleForm").onsubmit=async e=>{
     e.preventDefault();
@@ -674,7 +700,7 @@ if($("usersBody")){
         const {data,error}=await sb.rpc("lynkora_admin_settle_revenue_cycle",{p_cycle_id:id});
         if(error) throw error;
         if($("cycleMsg")) $("cycleMsg").textContent=`Đã chốt: ${Number(data?.valid_visits_count||0).toLocaleString("vi-VN")} valid visits · ${fmtVnd(data?.settled_earnings_vnd)} earnings.`;
-        await Promise.all([loadRevenueCycles(),loadAdmin()]);
+        await Promise.all([loadRevenueCycles(),loadAdmin(),loadPublisherModelAdmin()]);
       }else if(action==="delete"){
         if(!confirm("Xóa chu kỳ bản nháp này?")) return;
         const {error}=await sb.rpc("lynkora_admin_delete_revenue_cycle",{p_cycle_id:id});
