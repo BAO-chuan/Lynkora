@@ -1,35 +1,39 @@
-LYNKORA v1.12 — ADSTERRA SMARTLINK
+LYNKORA v1.13 — REVENUE CONTROL
 
 MỤC TIÊU
-- Tích hợp Smartlink Adsterra vào go.html theo cách tối thiểu, dễ hoàn tác.
-- Quảng cáo mở ở tab mới.
-- Nút "Tiếp tục đến liên kết" và anti-fraud hiện tại giữ nguyên.
-- Không tự động chuyển người dùng sang quảng cáo.
-- Không ép người dùng phải mở quảng cáo.
-- Không cộng tiền Lynkora chỉ vì người dùng mở quảng cáo.
-- Không đổi SQL.
+- Chặn nghĩa vụ trả Publisher vượt quá ngân sách quảng cáo đã xác nhận.
+- Admin nhập doanh thu Adsterra đã quy đổi sang VND.
+- Admin chọn tỷ lệ chia Publisher.
+- Admin bật/tạm dừng ghi earnings mới.
+- Valid visit vẫn hoạt động bình thường khi earnings tạm dừng.
 - Không đổi Edge Functions.
-- Không đổi app.js, dashboard.html, admin.html hay config.js.
-
-SMARTLINK ĐANG DÙNG
-https://www.profitableratecpmnetwork.com/kg2wk57xit?key=1f9fd32078ba3a0ec46a5552571670b9
 
 CÀI ĐẶT
-1) GitHub: ghi đè go.html và styles.css.
-2) Không chạy SQL.
-3) Không deploy lại Edge Functions.
-4) Không thay app.js/config.js.
-5) Mở thử một short link Lynkora.
-6) Kiểm tra:
-   - Có thẻ "QUẢNG CÁO ĐỐI TÁC".
-   - "Mở quảng cáo" mở tab mới.
-   - Sau 5 giây, nút "Tiếp tục đến liên kết" vẫn hoạt động bình thường.
-   - Link đích không bị thay bằng Smartlink.
+1. Chạy toàn bộ Lynkora-v1.13.sql trong Supabase SQL Editor.
+   Lưu ý: SQL chủ động đặt publisher_earnings_enabled = 0 để an toàn.
+2. GitHub ghi đè:
+   - admin.html
+   - dashboard.html
+   - app.js
+   - styles.css
+   - go.html
+3. config.js KHÔNG CẦN thay.
+4. Không deploy lại Edge Functions.
+5. Cache mới: v15.
 
-CACHE
-- styles.css trên go.html: v14
-- app.js/config.js vẫn dùng v13 vì không sửa.
+SAU KHI CÀI
+- Vào Admin > Revenue Control.
+- Khi Adsterra chưa có doanh thu xác nhận: để Earnings TẮT.
+- Khi có doanh thu: quy đổi số đã xác nhận sang VND, nhập vào ô doanh thu.
+- Chọn % chia Publisher (ví dụ 70% chỉ là lựa chọn kinh doanh của bạn, không phải mặc định bắt buộc).
+- Chỉ bật Earnings khi bạn muốn bắt đầu ghi thu nhập mới.
+- Hệ thống tự dừng ghi earnings nếu ngân sách Publisher đã hết.
+
+CÔNG THỨC
+Publisher budget = Confirmed ad revenue VND × Publisher share %
+Remaining budget = Publisher budget − tổng earnings đã ghi
 
 LƯU Ý
-- Doanh thu hiển thị trong Adsterra mới là số liệu của Adsterra.
-- Wallet/CPM nội bộ Lynkora hiện vẫn độc lập với doanh thu Adsterra.
+- Earnings cũ không bị xóa.
+- Withdrawal cũ không bị thay đổi.
+- v1.13 chưa tự đồng bộ API Adsterra; doanh thu xác nhận được Admin nhập thủ công.

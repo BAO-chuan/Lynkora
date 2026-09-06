@@ -81,10 +81,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=13";
+          if(data.session) location.href="dashboard.html?v=15";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=13";
+          if(error) throw error; location.href="dashboard.html?v=15";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -459,8 +459,8 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=13";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=15";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce},{data:revctl,error:rce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
@@ -469,7 +469,8 @@
       sb.rpc("lynkora_admin_user_wallets"),
       sb.rpc("lynkora_admin_fraud_logs",{p_limit:100}),
       sb.rpc("lynkora_admin_withdrawals",{p_limit:100}),
-      sb.rpc("lynkora_admin_withdrawal_config")
+      sb.rpc("lynkora_admin_withdrawal_config"),
+      sb.rpc("lynkora_admin_revenue_control")
     ]);
     if(se||ue||le||de||we||be||fe||wde||wce){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe||wde||wce);return}
     $("admUsers").textContent=stats?.users_count??0;
@@ -478,6 +479,21 @@
     $("admValid").textContent=stats?.valid_clicks_count??0;
     if($("admInvalid")) $("admInvalid").textContent=stats?.invalid_clicks_count??0;
     if($("cpmInput")) $("cpmInput").value=Math.round(Number(wallet?.current_cpm_vnd||0));
+    if(!rce && revctl){
+      if($("confirmedAdRevenueInput")) $("confirmedAdRevenueInput").value=Math.round(Number(revctl.confirmed_ad_revenue_vnd||0));
+      if($("publisherShareInput")) $("publisherShareInput").value=Number(revctl.publisher_share_percent||0);
+      if($("earningsEnabledInput")) $("earningsEnabledInput").checked=!!revctl.earnings_enabled;
+      if($("revenueControlStatus")){
+        $("revenueControlStatus").textContent=revctl.earnings_enabled?"Earnings đang bật":"Earnings đang tạm dừng";
+        $("revenueControlStatus").classList.toggle("ok",!!revctl.earnings_enabled);
+      }
+      if($("publisherBudgetValue")) $("publisherBudgetValue").textContent=fmtVnd(revctl.publisher_budget_vnd);
+      if($("recordedEarningsValue")) $("recordedEarningsValue").textContent=fmtVnd(revctl.recorded_earnings_vnd);
+      if($("remainingBudgetValue")) $("remainingBudgetValue").textContent=fmtVnd(revctl.remaining_budget_vnd);
+      if($("overBudgetValue")) $("overBudgetValue").textContent=fmtVnd(revctl.over_budget_vnd);
+    }else if(rce && $("revenueControlMsg")){
+      $("revenueControlMsg").textContent=errText(rce);
+    }
     if($("adminWalletEarned")) $("adminWalletEarned").textContent=fmtVnd(wallet?.total_earned_vnd);
     if($("adminWalletPending")) $("adminWalletPending").textContent=fmtVnd(wallet?.total_pending_vnd);
     if($("adminWalletApproved")) $("adminWalletApproved").textContent=fmtVnd(wallet?.total_approved_vnd);
@@ -607,6 +623,32 @@
         await loadAdmin();
       }catch(ex){
         if($("minWithdrawMsg")) $("minWithdrawMsg").textContent=errText(ex);
+      }finally{
+        if(btn) btn.disabled=false;
+      }
+    };
+
+
+    if($("revenueControlForm")) $("revenueControlForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("revenueControlForm").querySelector("button[type='submit']");
+      const confirmed=Number($("confirmedAdRevenueInput").value||0);
+      const share=Number($("publisherShareInput").value||0);
+      const enabled=!!$("earningsEnabledInput").checked;
+
+      if($("revenueControlMsg")) $("revenueControlMsg").textContent="Đang lưu...";
+      if(btn) btn.disabled=true;
+      try{
+        const {error}=await sb.rpc("lynkora_admin_set_revenue_control",{
+          p_confirmed_ad_revenue_vnd:confirmed,
+          p_publisher_share_percent:share,
+          p_earnings_enabled:enabled
+        });
+        if(error) throw error;
+        if($("revenueControlMsg")) $("revenueControlMsg").textContent="Đã cập nhật Revenue Control.";
+        await loadAdmin();
+      }catch(ex){
+        if($("revenueControlMsg")) $("revenueControlMsg").textContent=errText(ex);
       }finally{
         if(btn) btn.disabled=false;
       }
