@@ -1,0 +1,12 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=2"></head>
+<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost" href="dashboard.html">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
+<main class="admin-wrap">
+  <div class="dash-title"><span class="eyebrow">LYNKORA ADMIN • v1.1</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link. Không có chức năng doanh thu/rút tiền trong bản này.</p></div>
+  <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article></div>
+
+  <div class="panel"><div class="row-between"><div><h2>Người dùng</h2><p class="muted compact">Thông tin tổng hợp từ Auth + dữ liệu Lynkora.</p></div><button class="ghost" id="adminRefreshBtn">Làm mới</button></div><div class="table-scroll"><table><thead><tr><th>Email</th><th>Tên</th><th>Vai trò</th><th>Links</th><th>Mở</th><th>Hợp lệ</th><th>Ngày tạo</th></tr></thead><tbody id="usersBody"><tr><td colspan="7">Đang tải...</td></tr></tbody></table></div></div>
+
+  <div class="panel"><h2>Toàn bộ link</h2><div class="table-scroll"><table><thead><tr><th>Mã</th><th>Chủ sở hữu</th><th>URL đích</th><th>Trạng thái</th><th>Mở</th><th>Hợp lệ</th><th>Thao tác</th></tr></thead><tbody id="adminLinksBody"><tr><td colspan="7">Đang tải...</td></tr></tbody></table></div></div>
+  <div id="adminMsg" class="msg"></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=2"></script><script src="app.js?v=2"></script></body></html>
