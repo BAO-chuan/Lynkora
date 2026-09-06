@@ -153,6 +153,41 @@
     </article>`).join("")||'<p class="muted">Chưa có doanh thu được ghi nhận.</p>';
   }
 
+
+  async function loadWithdrawals() {
+    if (!$("withdrawBody")) return;
+
+    const [{data:summary,error:se},{data:rows,error:re}] = await Promise.all([
+      sb.rpc("lynkora_my_withdrawal_summary"),
+      sb.rpc("lynkora_my_withdrawals",{p_limit:50})
+    ]);
+
+    if (se || re) {
+      if ($("withdrawMsg")) $("withdrawMsg").textContent=errText(se||re);
+      $("withdrawBody").innerHTML=`<tr><td colspan="4" class="msg">${esc(errText(se||re))}</td></tr>`;
+      if ($("withdrawCards")) $("withdrawCards").innerHTML=`<p class="msg">${esc(errText(se||re))}</p>`;
+      return;
+    }
+
+    if ($("withdrawAvailable")) $("withdrawAvailable").textContent=`Khả dụng ${fmtVnd(summary?.available_vnd)}`;
+
+    const items=rows||[];
+    $("withdrawBody").innerHTML=items.map(x=>`<tr>
+      <td>${fmtDate(x.created_at)}</td>
+      <td><b>${fmtVnd(x.amount_vnd)}</b></td>
+      <td><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span></td>
+      <td>${esc(x.admin_note||"—")}</td>
+    </tr>`).join("")||'<tr><td colspan="4">Chưa có yêu cầu rút.</td></tr>';
+
+    if ($("withdrawCards")) $("withdrawCards").innerHTML=items.map(x=>`<article class="mobile-admin-card">
+      <div class="row-between gap">
+        <div><b>${fmtVnd(x.amount_vnd)}</b><small>${fmtDate(x.created_at)}</small></div>
+        <span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span>
+      </div>
+      <small>${esc(x.admin_note||x.note||"Không có ghi chú")}</small>
+    </article>`).join("")||'<p class="muted">Chưa có yêu cầu rút.</p>';
+  }
+
   async function loadLinks() {
     const u=await requireUser(); if(!u) return;
     $("userEmail").textContent=u.email||"";
@@ -187,9 +222,33 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet()])};
+
+    if ($("withdrawForm")) $("withdrawForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("withdrawForm").querySelector("button[type='submit']");
+      if ($("withdrawMsg")) $("withdrawMsg").textContent="Đang gửi...";
+      btn.disabled=true;
+      try{
+        const amount=Number($("withdrawAmount").value);
+        const note=$("withdrawNote").value.trim();
+        const {error}=await sb.rpc("lynkora_create_withdrawal",{
+          p_amount_vnd:amount,
+          p_note:note||null
+        });
+        if(error) throw error;
+        $("withdrawMsg").textContent="Đã gửi yêu cầu rút.";
+        $("withdrawForm").reset();
+        await Promise.all([loadWallet(),loadWithdrawals()]);
+      }catch(ex){
+        $("withdrawMsg").textContent=errText(ex);
+      }finally{
+        btn.disabled=false;
+      }
+    };
+
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -198,7 +257,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -219,7 +278,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadWallet()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
@@ -391,5 +450,28 @@
     };
     $("adminLinksBody").onclick=handleAdminAction;
     $("adminLinksCards").onclick=handleAdminAction;
+
+    document.addEventListener("click",async e=>{
+      const btn=e.target.closest(".wd-action");
+      if(!btn) return;
+      const action=btn.dataset.action;
+      const label=action==="approved"?"duyệt":"từ chối";
+      if(!confirm(`Xác nhận ${label} yêu cầu này?`)) return;
+
+      btn.disabled=true;
+      const note=prompt("Ghi chú Admin (có thể để trống):")||null;
+      const {error}=await sb.rpc("lynkora_admin_decide_withdrawal",{
+        p_request_id:btn.dataset.id,
+        p_status:action,
+        p_admin_note:note
+      });
+      if(error){
+        alert(errText(error));
+        btn.disabled=false;
+        return;
+      }
+      await loadAdmin();
+    });
+
   }
 })();
