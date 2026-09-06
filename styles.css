@@ -75,3 +75,8 @@
 .cpm-form{display:flex;align-items:end;gap:10px}.cpm-form label{display:grid;gap:6px;color:var(--muted);font-size:12px}.cpm-form input{width:180px}
 .revenue-admin{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:15px;border-top:1px solid #1c3348}.revenue-admin b{font-size:26px;color:#73f0c1}
 @media(max-width:520px){.revenue-panel .row-between{display:grid}.revenue-number{text-align:left;margin-top:12px}.cpm-form{display:grid;width:100%;margin-top:12px}.cpm-form input{width:100%}.cpm-form .primary{display:flex!important;justify-content:center}.revenue-admin{gap:10px}.revenue-admin b{font-size:22px}}
+
+/* Lynkora v1.4 */
+.stats-five{grid-template-columns:repeat(5,1fr)}
+@media(max-width:900px){.stats-five{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.stats-five{grid-template-columns:1fr 1fr}}

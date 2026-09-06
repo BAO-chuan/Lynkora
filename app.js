@@ -14,6 +14,11 @@
   const shortUrl = code => `${location.origin}${basePath}go.html?c=${encodeURIComponent(code)}`;
   const pct = (a,b) => b > 0 ? Math.round((a/b)*100) : 0;
   const fmtVnd = n => `${Math.round(Number(n||0)).toLocaleString("vi-VN")} ₫`;
+  const clientKey = () => {
+    let k=localStorage.getItem("lynkora_client_key");
+    if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
+    return k;
+  };
 
   async function requireUser() {
     if (!sb) { alert("Bạn chưa cấu hình Supabase trong config.js"); location.href="index.html"; return null; }
@@ -51,10 +56,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=5";
+          if(data.session) location.href="dashboard.html?v=6";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=5";
+          if(error) throw error; location.href="dashboard.html?v=6";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -118,6 +123,7 @@
     $("totalClicks").textContent=clicks;
     $("validClicks").textContent=valid;
     if($("validRate")) $("validRate").textContent=`${pct(valid,clicks)}%`;
+    if($("invalidClicks")) $("invalidClicks").textContent=Math.max(0,clicks-valid);
     $("linksList").innerHTML=rows.length?rows.map(x=>{
       const url=shortUrl(x.code), opens=Number(x.click_count||0), good=Number(x.valid_click_count||0);
       return `<article class="link-row ${x.is_active?'':'disabled-link'}" data-code="${esc(x.code)}">
@@ -178,7 +184,7 @@
     let target=null, token=null;
     (async()=>{
       if(!sb){$("gateMsg").textContent="Website chưa được cấu hình backend.";return}
-      const {data,error}=await sb.rpc("lynkora_open_link",{p_code:code});
+      const {data,error}=await sb.rpc("lynkora_open_link",{p_code:code,p_client_key:clientKey()});
       if(error){$("gateMsg").textContent=errText(error);return}
       target=data?.target_url; token=data?.visit_token;
       let n=5; $("countdown").textContent=n;
@@ -218,7 +224,7 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=5";return}
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=6";return}
     const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
@@ -231,6 +237,7 @@
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
     $("admValid").textContent=stats?.valid_clicks_count??0;
+    if($("admInvalid")) $("admInvalid").textContent=stats?.invalid_clicks_count??0;
     if($("cpmInput")) $("cpmInput").value=Math.round(Number(rev?.cpm_vnd||0));
     if($("adminEstimatedRevenue")) $("adminEstimatedRevenue").textContent=fmtVnd(rev?.estimated_vnd);
     renderDailyChart($("adminDailyChart"),daily,$("adminWeekSummary"));
