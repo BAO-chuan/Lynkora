@@ -11,3 +11,9 @@ Mới:
 - Đổi mật khẩu
 - Đăng xuất trong tab Tài khoản
 - app.js cache v21
+
+
+=== v1.20 ===
+- Thêm mục Giới thiệu Lynkora trên trang chủ.
+- Thêm mục Giới thiệu riêng trong Dashboard desktop/mobile.
+- Giữ nguyên logic backend và các chức năng v1.19.1.

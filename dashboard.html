@@ -1,7 +1,7 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=19"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=17">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
-<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.19.1</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><button class="lynkora-nav" type="button" data-view="about">ⓘ Giới thiệu</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
+<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.20</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel"><span class="eyebrow">QUICK ACCESS • v1.19</span><h2>Chọn mục cần thao tác</h2><p class="muted compact">Dashboard đã được chia thành từng khu vực riêng. Dùng menu bên trái hoặc thanh điều hướng phía dưới trên điện thoại.</p></div></div>
@@ -128,6 +128,31 @@
 </div>
 <div class="panel"><h2>Phiên đăng nhập</h2><p class="muted compact">Đăng xuất khỏi phiên hiện tại trên thiết bị này.</p><button id="accountLogoutBtn" class="ghost" type="button">Đăng xuất</button></div>
 </div>
+
+<div class="lynkora-view" data-view-panel="about">
+<div class="panel">
+  <div class="row-between"><div><span class="eyebrow">ABOUT LYNKORA • v1.20</span><h2>Giới thiệu về Lynkora</h2><p class="muted compact">Nền tảng rút gọn link, thống kê và quản lý hoạt động dành cho Publisher.</p></div><span class="pill">Lynkora</span></div>
+  <p class="muted">Lynkora giúp Publisher tạo các đường link ngắn gọn, dễ chia sẻ và theo dõi hiệu suất của từng link. Toàn bộ dữ liệu quan trọng như lượt mở, lượt hợp lệ, thống kê, thu nhập, ví và yêu cầu rút tiền được tập trung trong một Dashboard duy nhất.</p>
+</div>
+<div class="panel">
+  <span class="eyebrow">HOW IT WORKS</span><h2>Lynkora hoạt động như thế nào?</h2>
+  <div class="wallet-mini wallet-mini-v110">
+    <span><small>Bước 1</small><b>Tạo link</b><small>Dán URL đích và tạo đường link Lynkora.</small></span>
+    <span><small>Bước 2</small><b>Chia sẻ</b><small>Sử dụng link đã tạo trên các kênh phù hợp của bạn.</small></span>
+    <span><small>Bước 3</small><b>Theo dõi</b><small>Xem lượt mở, lượt hợp lệ và hiệu suất từng link.</small></span>
+    <span><small>Bước 4</small><b>Quản lý</b><small>Theo dõi thu nhập, ví và yêu cầu rút tiền tại Dashboard.</small></span>
+  </div>
+</div>
+<div class="panel">
+  <span class="eyebrow">OUR PRINCIPLES</span><h2>Điều Lynkora hướng tới</h2>
+  <p class="muted">Lynkora hướng tới trải nghiệm đơn giản, minh bạch và dễ kiểm soát. Hệ thống không hiển thị thu nhập giả; doanh thu chỉ được ghi nhận dựa trên dữ liệu hợp lệ và các kỳ doanh thu đã được xác nhận. Lynkora cũng không yêu cầu bạn cung cấp mật khẩu, mã PIN hoặc OTP trong phần rút tiền hay hỗ trợ.</p>
+</div>
+<div class="panel">
+  <span class="eyebrow">SUPPORT</span><h2>Cần hỗ trợ?</h2>
+  <p class="muted compact">Nếu gặp vấn đề khi tạo link, xem thống kê, quản lý tài khoản hoặc yêu cầu rút tiền, hãy liên hệ kênh hỗ trợ chính thức của Lynkora khi kênh này được công bố trên website.</p>
+</div>
+</div>
+
 </section></main>
 
 <style>
@@ -138,7 +163,7 @@
 @media(max-width:800px){
   body{padding-bottom:78px}
   .lynkora-side-nav{display:none!important}
-  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
+  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
   .lynkora-bottom-nav button{min-width:0;border:0;background:transparent;color:#8d9ab0;border-radius:13px;padding:7px 2px 6px;font-size:8px;font-weight:700;line-height:1.15}
   .lynkora-bottom-nav button span{display:block;font-size:18px;line-height:22px;margin-bottom:2px}
   .lynkora-bottom-nav button.active{background:rgba(55,145,255,.14);color:#8fc7ff}
@@ -152,10 +177,11 @@
   <button type="button" data-view="earnings"><span>₫</span>Thu nhập</button>
   <button type="button" data-view="withdraw"><span>⇄</span>Rút tiền</button>
   <button type="button" data-view="account"><span>⚙</span>Tài khoản</button>
+  <button type="button" data-view="about"><span>ⓘ</span>Giới thiệu</button>
 </nav>
 <script>
 (()=>{
-  const validViews=new Set(["overview","links","analytics","earnings","withdraw","account"]);
+  const validViews=new Set(["overview","links","analytics","earnings","withdraw","account","about"]);
   const buttons=[...document.querySelectorAll("[data-view]")];
   const panels=[...document.querySelectorAll("[data-view-panel]")];
   function showView(name,updateHash=true){
