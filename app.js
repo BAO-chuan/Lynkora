@@ -491,6 +491,8 @@
       if($("recordedEarningsValue")) $("recordedEarningsValue").textContent=fmtVnd(revctl.recorded_earnings_vnd);
       if($("remainingBudgetValue")) $("remainingBudgetValue").textContent=fmtVnd(revctl.remaining_budget_vnd);
       if($("overBudgetValue")) $("overBudgetValue").textContent=fmtVnd(revctl.over_budget_vnd);
+      if($("dynamicCpmValue")) $("dynamicCpmValue").textContent=fmtVnd(revctl.publisher_cpm_vnd);
+      if($("dynamicValidVisits")) $("dynamicValidVisits").textContent=`${Number(revctl.valid_visits_count||0).toLocaleString("vi-VN")} valid visits`;
     }else if(rce && $("revenueControlMsg")){
       $("revenueControlMsg").textContent=errText(rce);
     }
@@ -652,18 +654,6 @@
       }finally{
         if(btn) btn.disabled=false;
       }
-    };
-
-    if($("cpmForm")) $("cpmForm").onsubmit=async e=>{
-      e.preventDefault();
-      $("adminMsg").textContent="";
-      const value=Number($("cpmInput").value);
-      try{
-        const {error}=await sb.rpc("lynkora_admin_set_cpm_vnd",{p_cpm_vnd:value});
-        if(error) throw error;
-        $("adminMsg").textContent="Đã lưu CPM.";
-        await loadAdmin();
-      }catch(ex){$("adminMsg").textContent=errText(ex)}
     };
     $("adminLinksBody").onclick=handleAdminAction;
     $("adminLinksCards").onclick=handleAdminAction;

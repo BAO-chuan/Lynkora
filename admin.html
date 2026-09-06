@@ -1,14 +1,14 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=15"></head>
-<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=15">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=16"></head>
+<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=16">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.11</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.14</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article><article><small>Bị từ chối</small><b id="admInvalid">0</b></article></div>
 
 <div class="panel revenue-control-panel">
   <div class="row-between revenue-control-head">
     <div>
-      <span class="eyebrow">REVENUE CONTROL • v1.13</span>
+      <span class="eyebrow">REVENUE CONTROL • v1.14</span>
       <h2>Ngân sách Publisher</h2>
       <p class="muted compact">Chỉ nhập doanh thu quảng cáo đã được Adsterra ghi nhận và bạn đã quy đổi sang VND. Hệ thống sẽ không ghi earnings mới vượt quá phần ngân sách dành cho Publisher.</p>
     </div>
@@ -38,7 +38,7 @@
   </div>
   <p class="fine">Revenue Control không tự đọc số dư Adsterra. Bạn chỉ cập nhật số doanh thu đã xác nhận. Khi công tắc tắt hoặc ngân sách hết, valid visit vẫn được xác minh nhưng không phát sinh earnings mới.</p>
 </div>
-<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">REVENUE CONFIG • v1.13</span><h2>Mức CPM & tổng quan ví</h2><p class="muted compact">CPM mới chỉ áp dụng cho lượt hợp lệ phát sinh sau khi thay đổi. Số dư khả dụng đã trừ Pending và Approved.</p></div><form id="cpmForm" class="cpm-form"><label>VND / 1.000 lượt hợp lệ<input id="cpmInput" type="number" min="0" max="100000000" step="1000" required></label><button class="primary" type="submit">Lưu CPM</button></form></div><div class="revenue-admin wallet-admin-summary wallet-admin-v110"><span><small>Tổng thu nhập</small><b id="adminWalletEarned">0 ₫</b></span><span><small>Đang chờ rút</small><b id="adminWalletPending">0 ₫</b></span><span><small>Đã duyệt rút</small><b id="adminWalletApproved">0 ₫</b></span><span><small>Tổng khả dụng</small><b id="adminWalletBalance">0 ₫</b></span><span><small>Lượt ghi doanh thu</small><b id="adminWalletVisits">0</b></span></div></div>
+<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">DYNAMIC CPM • v1.14</span><h2>CPM Publisher tự động</h2><p class="muted compact">CPM được tính từ doanh thu quảng cáo xác nhận × tỷ lệ chia Publisher ÷ tổng valid visits × 1.000. Earnings cũ không bị tính lại.</p></div><div class="revenue-number"><small>CPM hiện tại</small><b id="dynamicCpmValue">0 ₫</b><span id="dynamicValidVisits">0 valid visits</span></div></div><div class="revenue-admin wallet-admin-summary wallet-admin-v110"><span><small>Tổng thu nhập</small><b id="adminWalletEarned">0 ₫</b></span><span><small>Đang chờ rút</small><b id="adminWalletPending">0 ₫</b></span><span><small>Đã duyệt rút</small><b id="adminWalletApproved">0 ₫</b></span><span><small>Tổng khả dụng</small><b id="adminWalletBalance">0 ₫</b></span><span><small>Lượt ghi doanh thu</small><b id="adminWalletVisits">0</b></span></div></div>
   <div class="panel" id="withdrawConfig">
     <div class="row-between"><div><span class="eyebrow">WITHDRAWAL CONFIG</span><h2>Cấu hình rút tiền</h2><p class="muted compact">Thiết lập mức rút tối thiểu áp dụng cho mọi Publisher.</p></div><span id="adminMinWithdrawPill" class="pill">Tối thiểu 0 ₫</span></div>
     <form id="minWithdrawForm" class="cpm-form"><label>Rút tối thiểu (VND)<input id="minWithdrawInput" type="number" min="1000" max="1000000000" step="1000" required></label><button class="primary" type="submit">Lưu mức rút</button></form>
@@ -99,4 +99,4 @@
   </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=15"></script><script src="app.js?v=15"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=16"></script><script src="app.js?v=16"></script></body></html>
