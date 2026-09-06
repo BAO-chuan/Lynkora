@@ -238,6 +238,23 @@
   }
 
 
+  async function loadPendingEarnings(){
+    if(!$('pendingEarningsCard')) return;
+    const {data,error}=await sb.rpc('lynkora_my_pending_earnings_summary');
+    if(error){
+      if($('pendingEarningsStatus')) $('pendingEarningsStatus').textContent=errText(error);
+      return;
+    }
+    const pending=Number(data?.pending_valid_visits||0);
+    if($('pendingValidVisits')) $('pendingValidVisits').textContent=pending.toLocaleString('vi-VN');
+    if($('pendingEarningsStatus')) {
+      $('pendingEarningsStatus').textContent=pending>0?`${pending.toLocaleString('vi-VN')} valid đang chờ`:'Không có lượt đang chờ';
+      $('pendingEarningsStatus').classList.add('ok');
+    }
+    if($('pendingSettlementState')) $('pendingSettlementState').textContent=pending>0?'Đang chờ chốt kỳ':'Đã cập nhật';
+  }
+
+
   async function loadPublisherModel(){
     if(!$('publisherModelCard')) return;
     const {data,error}=await sb.rpc('lynkora_my_publisher_model');
@@ -343,7 +360,7 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
     if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").onchange=()=>loadLinkDaily($("linkAnalyticsSelect").value);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
 
@@ -392,7 +409,7 @@
       }
     };
 
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -401,7 +418,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -422,7 +439,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
