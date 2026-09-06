@@ -1,15 +1,21 @@
-LYNKORA v1.8 — WITHDRAWAL REQUESTS
+LYNKORA v1.9 — PAYOUT PROFILE + WITHDRAWAL CONFIG
 
-- Publisher tạo yêu cầu rút từ số dư khả dụng.
-- Pending và approved được trừ khỏi số dư khả dụng để chống yêu cầu vượt số dư.
-- Admin duyệt hoặc từ chối thủ công, có ghi chú.
-- Có lịch sử yêu cầu cho Publisher và danh sách quản trị cho Admin.
-- KHÔNG tự động chuyển tiền/ngân hàng trong v1.8.
-- Không cần deploy lại Edge Functions.
+MỚI
+- Admin đặt mức rút tối thiểu (mặc định 50.000 VND).
+- Publisher lưu phương thức nhận tiền: Ngân hàng / MoMo / ZaloPay / Khác.
+- Lưu tên người nhận, số tài khoản/SĐT/ID và nhà cung cấp/ngân hàng.
+- Khi tạo yêu cầu rút, thông tin nhận tiền được snapshot vào yêu cầu.
+- Đổi payout profile sau này không làm thay đổi yêu cầu cũ.
+- Không nhập/lưu mật khẩu, PIN hoặc OTP.
+- Không tự động chuyển tiền.
 
-Cập nhật:
-1. Chạy Lynkora-v1.8.sql sau v1.7.
-2. GitHub ghi đè dashboard.html, admin.html, app.js, styles.css.
-3. config.js không đổi.
-4. go.html đổi app.js cache thành ?v=10 để đồng bộ.
-5. Test dashboard.html?v=10 và admin.html?v=10.
+CẬP NHẬT
+1) Chạy Lynkora-v1.9.sql sau v1.8.
+2) GitHub ghi đè dashboard.html, admin.html, app.js, styles.css.
+3) config.js không đổi.
+4) Không deploy lại Edge Functions.
+5) go.html đổi app.js cache thành ?v=11 để đồng bộ.
+6) Test dashboard.html?v=11 và admin.html?v=11.
+
+LƯU Ý
+- Bản app.js này được xây từ hotfix v1.8 đang dùng, không phải app.js v1.8 lỗi ban đầu.

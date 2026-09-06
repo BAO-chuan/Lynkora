@@ -22,6 +22,9 @@
   const withdrawalStatusLabel = status => ({
     pending:"Chờ duyệt", approved:"Đã duyệt", rejected:"Từ chối"
   })[status] || status || "—";
+  const payoutMethodLabel = method => ({
+    bank:"Ngân hàng", momo:"MoMo", zalopay:"ZaloPay", other:"Khác"
+  })[method] || method || "—";
   const clientKey = () => {
     let k=localStorage.getItem("lynkora_client_key");
     if(!k){ k=(crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`); localStorage.setItem("lynkora_client_key",k); }
@@ -78,10 +81,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=10";
+          if(data.session) location.href="dashboard.html?v=11";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=10";
+          if(error) throw error; location.href="dashboard.html?v=11";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -154,6 +157,24 @@
   }
 
 
+  async function loadPayoutProfile() {
+    if(!$("payoutProfileForm")) return;
+    const {data,error}=await sb.rpc("lynkora_my_payout_profile");
+    if(error){
+      $("payoutProfileMsg").textContent=errText(error);
+      return;
+    }
+    if(data?.configured){
+      $("payoutMethod").value=data.method||"bank";
+      $("payoutName").value=data.account_name||"";
+      $("payoutAccount").value=data.account_ref||"";
+      $("payoutProvider").value=data.provider||"";
+      $("payoutProfileStatus").textContent="Đã lưu";
+    }else{
+      $("payoutProfileStatus").textContent="Chưa lưu";
+    }
+  }
+
   async function loadWithdrawals() {
     if (!$("withdrawBody")) return;
 
@@ -164,24 +185,30 @@
 
     if (se || re) {
       if ($("withdrawMsg")) $("withdrawMsg").textContent=errText(se||re);
-      $("withdrawBody").innerHTML=`<tr><td colspan="4" class="msg">${esc(errText(se||re))}</td></tr>`;
+      $("withdrawBody").innerHTML=`<tr><td colspan="5" class="msg">${esc(errText(se||re))}</td></tr>`;
       if ($("withdrawCards")) $("withdrawCards").innerHTML=`<p class="msg">${esc(errText(se||re))}</p>`;
       return;
     }
 
     if ($("withdrawAvailable")) $("withdrawAvailable").textContent=`Khả dụng ${fmtVnd(summary?.available_vnd)}`;
+    if ($("withdrawMinimum")) $("withdrawMinimum").textContent=fmtVnd(summary?.minimum_vnd);
+    if ($("withdrawAmount")) {
+      $("withdrawAmount").min=Math.max(1,Number(summary?.minimum_vnd||1000));
+      $("withdrawAmount").step=1000;
+    }
 
     const items=rows||[];
     $("withdrawBody").innerHTML=items.map(x=>`<tr>
       <td>${fmtDate(x.created_at)}</td>
       <td><b>${fmtVnd(x.amount_vnd)}</b></td>
+      <td>${esc(payoutMethodLabel(x.payment_method))}</td>
       <td><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span></td>
       <td>${esc(x.admin_note||"—")}</td>
-    </tr>`).join("")||'<tr><td colspan="4">Chưa có yêu cầu rút.</td></tr>';
+    </tr>`).join("")||'<tr><td colspan="5">Chưa có yêu cầu rút.</td></tr>';
 
     if ($("withdrawCards")) $("withdrawCards").innerHTML=items.map(x=>`<article class="mobile-admin-card">
       <div class="row-between gap">
-        <div><b>${fmtVnd(x.amount_vnd)}</b><small>${fmtDate(x.created_at)}</small></div>
+        <div><b>${fmtVnd(x.amount_vnd)}</b><small>${fmtDate(x.created_at)} • ${esc(payoutMethodLabel(x.payment_method))}</small></div>
         <span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span>
       </div>
       <small>${esc(x.admin_note||x.note||"Không có ghi chú")}</small>
@@ -222,8 +249,30 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
+
+    if ($("payoutProfileForm")) $("payoutProfileForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("payoutProfileForm").querySelector("button[type='submit']");
+      btn.disabled=true;
+      $("payoutProfileMsg").textContent="Đang lưu...";
+      try{
+        const {error}=await sb.rpc("lynkora_save_payout_profile",{
+          p_method:$("payoutMethod").value,
+          p_account_name:$("payoutName").value.trim(),
+          p_account_ref:$("payoutAccount").value.trim(),
+          p_provider:$("payoutProvider").value.trim()||null
+        });
+        if(error) throw error;
+        $("payoutProfileMsg").textContent="Đã lưu thông tin nhận tiền.";
+        $("payoutProfileStatus").textContent="Đã lưu";
+      }catch(ex){
+        $("payoutProfileMsg").textContent=errText(ex);
+      }finally{
+        btn.disabled=false;
+      }
+    };
 
     if ($("withdrawForm")) $("withdrawForm").onsubmit=async e=>{
       e.preventDefault();
@@ -248,7 +297,7 @@
       }
     };
 
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -257,7 +306,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -278,7 +327,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadWallet(),loadWithdrawals(),loadPayoutProfile()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
@@ -328,8 +377,8 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=10";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=11";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:wallet,error:we},{data:balances,error:be},{data:fraud,error:fe},{data:withdrawals,error:wde},{data:wdcfg,error:wce}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
@@ -337,9 +386,10 @@
       sb.rpc("lynkora_admin_wallet_summary"),
       sb.rpc("lynkora_admin_user_balances"),
       sb.rpc("lynkora_admin_fraud_logs",{p_limit:100}),
-      sb.rpc("lynkora_admin_withdrawals",{p_limit:100})
+      sb.rpc("lynkora_admin_withdrawals",{p_limit:100}),
+      sb.rpc("lynkora_admin_withdrawal_config")
     ]);
-    if(se||ue||le||de||we||be||fe||wde){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe||wde);return}
+    if(se||ue||le||de||we||be||fe||wde||wce){$("adminMsg").textContent=errText(se||ue||le||de||we||be||fe||wde||wce);return}
     $("admUsers").textContent=stats?.users_count??0;
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
@@ -371,17 +421,26 @@
     $("adminLinksBody").innerHTML=linkRows.map(x=>`<tr data-id="${esc(x.link_id)}"><td><b>${esc(x.code)}</b></td><td>${esc(x.owner_email)}</td><td class="url-cell">${esc(x.target_url)}</td><td><span class="status ${x.is_active?"on":"off"}">${x.is_active?"Bật":"Tắt"}</span></td><td>${Number(x.click_count||0)}</td><td>${Number(x.valid_click_count||0)}</td><td><div class="table-actions"><button class="ghost tiny" data-admin-action="toggle" data-active="${x.is_active?'1':'0'}">${x.is_active?'Tắt':'Bật'}</button><button class="danger tiny" data-admin-action="delete">Xóa</button></div></td></tr>`).join("")||'<tr><td colspan="7">Chưa có link.</td></tr>';
     $("adminLinksCards").innerHTML=linkRows.map(adminLinkCard).join("")||'<p class="muted">Chưa có link.</p>';
 
+    if($("minWithdrawInput")) $("minWithdrawInput").value=Math.round(Number(wdcfg?.minimum_vnd||1000));
+    if($("adminMinWithdrawPill")) $("adminMinWithdrawPill").textContent=`Tối thiểu ${fmtVnd(wdcfg?.minimum_vnd)}`;
+
     const withdrawalRows=withdrawals||[];
     const pendingCount=withdrawalRows.filter(x=>x.status==="pending").length;
     if($("withdrawPendingPill")) $("withdrawPendingPill").textContent=`${pendingCount} chờ duyệt`;
     const withdrawalActions=x=>x.status==="pending"?`<div class="inline-actions"><button class="small primary wd-action" data-id="${x.id}" data-action="approved">Duyệt</button><button class="small danger wd-action" data-id="${x.id}" data-action="rejected">Từ chối</button></div>`:"—";
+    const payoutText=x=>[payoutMethodLabel(x.payment_method),x.payment_provider,x.payment_account_name,x.payment_account_ref].filter(Boolean).join(" • ");
     if($("withdrawAdminBody")) $("withdrawAdminBody").innerHTML=withdrawalRows.map(x=>`<tr>
-      <td>${fmtDate(x.created_at)}</td><td>${esc(x.email||"—")}</td><td><b>${fmtVnd(x.amount_vnd)}</b></td>
+      <td>${fmtDate(x.created_at)}</td>
+      <td>${esc(x.email||"—")}</td>
+      <td><b>${fmtVnd(x.amount_vnd)}</b></td>
+      <td>${esc(payoutMethodLabel(x.payment_method))}</td>
+      <td class="client-cell">${esc(payoutText(x)||"—")}</td>
       <td><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span></td>
-      <td>${esc(x.note||"—")}</td><td>${withdrawalActions(x)}</td>
-    </tr>`).join("")||'<tr><td colspan="6">Chưa có yêu cầu rút.</td></tr>';
+      <td>${withdrawalActions(x)}</td>
+    </tr>`).join("")||'<tr><td colspan="7">Chưa có yêu cầu rút.</td></tr>';
     if($("withdrawAdminCards")) $("withdrawAdminCards").innerHTML=withdrawalRows.map(x=>`<article class="mobile-admin-card">
       <div class="row-between gap"><div><b>${esc(x.email||"—")}</b><small>${fmtDate(x.created_at)}</small></div><b>${fmtVnd(x.amount_vnd)}</b></div>
+      <small>${esc(payoutText(x)||"Chưa có thông tin nhận tiền")}</small>
       <div class="row-between gap"><span class="status ${x.status==="approved"?"on":"off"}">${esc(withdrawalStatusLabel(x.status))}</span>${withdrawalActions(x)}</div>
       <small>${esc(x.note||"Không có ghi chú")}</small>
     </article>`).join("")||'<p class="muted">Chưa có yêu cầu rút.</p>';

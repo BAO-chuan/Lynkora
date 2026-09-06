@@ -107,3 +107,13 @@
 .withdraw-form input{width:100%}
 .inline-actions{display:flex;gap:6px;flex-wrap:wrap}
 @media(max-width:700px){.withdraw-form{grid-template-columns:1fr}.inline-actions{margin-top:8px}}
+
+/* Lynkora v1.9 — payout profile + withdrawal config */
+.payout-profile-form{display:grid;grid-template-columns:1fr 1.2fr 1.5fr 1.2fr auto;gap:10px;align-items:end;margin-top:16px}
+.payout-profile-form label{display:grid;gap:6px}
+.payout-profile-form select{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#06140f;color:#fff;outline:none}
+.withdraw-rules{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;margin:14px 0;border:1px solid #1c2c43;border-radius:12px;background:#081421}
+.withdraw-rules span{color:var(--muted);font-size:13px}
+.withdraw-rules b{font-size:18px}
+@media(max-width:900px){.payout-profile-form{grid-template-columns:1fr 1fr}.payout-profile-form button{grid-column:1/-1}}
+@media(max-width:700px){.payout-profile-form{grid-template-columns:1fr}.payout-profile-form button{grid-column:auto}}
