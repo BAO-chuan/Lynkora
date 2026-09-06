@@ -1,16 +1,19 @@
-Lynkora v1.1 — Admin + Link Manager
+LYNKORA v1.2 — MOBILE + ANALYTICS
 
-Thứ tự cập nhật:
-1. Supabase SQL Editor: chạy Lynkora-v1.1.sql.
-2. GitHub: upload/overwrite dashboard.html, app.js, styles.css, config.js và thêm admin.html.
-3. Không cần thay index.html, auth.html, go.html.
-4. Mở dashboard.html?v=2 và kiểm tra nút Admin.
+Cập nhật theo thứ tự:
+1) Supabase SQL Editor: chạy Lynkora-v1.2.sql.
+2) GitHub: ghi đè dashboard.html, admin.html, app.js, styles.css.
+3) config.js không bắt buộc upload lại nếu bản hiện tại đang chạy đúng.
+4) KHÔNG sửa index.html, auth.html, go.html.
+5) Test:
+   https://bao-chuan.github.io/Lynkora/dashboard.html?v=3
+   https://bao-chuan.github.io/Lynkora/admin.html?v=3
 
-v1.1 có:
-- Sao chép link ngắn.
-- Bật/tắt link.
-- Xóa link của chính người tạo.
-- Admin thống kê người dùng/link/lượt mở/lượt hợp lệ.
-- Admin bật/tắt/xóa link.
-- Quyền Admin kiểm tra ở backend.
-- Không có tiền thật, payout hay mạng quảng cáo.
+Mới trong v1.2:
+- Tỷ lệ lượt hợp lệ.
+- Biểu đồ traffic 7 ngày.
+- Ngày tạo + tỷ lệ hợp lệ cho từng link.
+- Admin có biểu đồ 7 ngày.
+- Bảng Admin chuyển thành card trên mobile.
+- Nút Admin/Publisher vẫn hiện trên iPhone.
+- Không thay Auth, tạo link, countdown hay redirect đang chạy ổn.

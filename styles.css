@@ -6,3 +6,65 @@
 .compact{margin:2px 0 0}.danger{border:1px solid #6d2d3b;background:#2a1118;color:#ff9cac;border-radius:9px;padding:10px 15px;font-weight:750;cursor:pointer}.link-main{min-width:0;flex:1}.code-line{display:flex;align-items:center;gap:8px}.status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:99px;font-size:10px;font-weight:850;letter-spacing:.4px}.status.on{color:#69f0bd;background:#0f3c32;border:1px solid #17614e}.status.off{color:#b8c2d2;background:#182231;border:1px solid #2a3a50}.short-preview{color:#4bc7ff!important}.link-actions{flex-wrap:wrap;justify-content:flex-end}.disabled-link{opacity:.68}.admin-wrap{max-width:1180px;margin:34px auto;padding:0 20px}.admin-stats{grid-template-columns:repeat(4,1fr)}.table-scroll{overflow:auto;border:1px solid #1c2d44;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:860px;background:#081421}th,td{text-align:left;padding:12px 13px;border-bottom:1px solid #18283d;vertical-align:middle}th{font-size:12px;color:#8fa2bb;background:#0c192a;position:sticky;top:0}td{color:#dce6f4}.url-cell{max-width:330px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.table-actions{display:flex;gap:7px}
 @media(max-width:800px){.admin-stats{grid-template-columns:1fr 1fr}.link-actions{justify-content:flex-start}.link-row{align-items:flex-start}}
 @media(max-width:520px){.admin-stats{grid-template-columns:1fr 1fr}.code-line{flex-wrap:wrap}}
+
+
+/* =========================================================
+   Lynkora v1.2 — Mobile + Analytics
+   ========================================================= */
+.stats-four{grid-template-columns:repeat(4,1fr)}
+.pill{display:inline-flex;align-items:center;white-space:nowrap;padding:6px 10px;border-radius:999px;background:#0b2137;border:1px solid #24405f;color:#75dfff;font-size:12px;font-weight:800}
+.daily-chart{height:210px;display:grid;grid-template-columns:repeat(7,minmax(36px,1fr));align-items:end;gap:10px;padding:24px 4px 0;margin-top:10px;border-bottom:1px solid #20324b}
+.day-col{height:100%;display:grid;grid-template-rows:1fr auto auto;gap:5px;align-items:end;text-align:center;min-width:0}
+.bar-stack{height:145px;display:flex;align-items:end;justify-content:center;gap:3px}
+.bar-stack i{display:block;width:min(14px,38%);min-height:2px;border-radius:5px 5px 2px 2px;transition:height .25s ease}
+.bar-open{background:linear-gradient(#33d7ff,#1687ff)}
+.bar-valid{background:linear-gradient(#64f0b5,#18aa79)}
+.day-col>b{font-size:12px}.day-col>small{font-size:10px;color:var(--muted);white-space:nowrap}
+.chart-legend{display:flex;justify-content:flex-end;gap:14px;margin-top:12px;color:var(--muted);font-size:12px}
+.chart-legend span{display:flex;align-items:center;gap:5px}.legend-dot{width:8px;height:8px;border-radius:50%}.legend-dot.opens{background:#22a8ff}.legend-dot.valid{background:#37d89c}
+.link-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;color:#7f92ab;font-size:11px}
+.target-preview{margin-top:3px}.mobile-only{display:none}
+.mobile-card-list{display:grid;gap:10px;margin-top:14px}
+.mobile-admin-card{padding:14px;background:#081421;border:1px solid #1c2c43;border-radius:12px;min-width:0}
+.mobile-admin-card small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobile-admin-card .gap{gap:10px}
+.mini-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.mini-metrics span{padding:9px;background:#0c1a2c;border:1px solid #1d314a;border-radius:9px;text-align:center}
+.mini-metrics b,.mini-metrics small{display:block}.mini-metrics small{font-size:10px}
+.mobile-card-actions{display:flex;gap:8px;margin-top:12px}
+.admin-title{padding-top:4px}
+.admin-wrap>.panel{margin:16px 0}
+
+@media(max-width:800px){
+  .stats-four{grid-template-columns:1fr 1fr}
+  .daily-chart{gap:6px}
+  .bar-stack{height:120px}
+}
+@media(max-width:520px){
+  body{overflow-x:hidden}
+  .topbar{height:66px;padding:0 12px;gap:10px}
+  .brand{font-size:20px}.logo{width:32px;height:32px}
+  .topbar .ghost.mobile-keep{display:inline-flex!important;padding:8px 10px}
+  .auth-actions{gap:6px}
+  .dash{margin:20px auto;padding:0 12px}
+  .dash-title h1{font-size:34px;line-height:1.08}
+  .stats-four{grid-template-columns:1fr 1fr;gap:9px}
+  .stats-four article{padding:14px}.stats-four b{font-size:26px}
+  .panel{padding:18px}
+  .row-between{gap:10px;align-items:flex-start}
+  .daily-chart{height:180px;gap:3px;padding-left:0;padding-right:0}
+  .bar-stack{height:112px;gap:2px}.bar-stack i{width:10px}
+  .day-col>b{font-size:11px}.day-col>small{font-size:9px}
+  .chart-legend{justify-content:flex-start}
+  .link-row{padding:14px;width:100%;overflow:hidden}
+  .link-main{width:100%}.link-row small{max-width:100%}
+  .link-actions{width:100%;display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important}
+  .link-actions>span{grid-column:1/-1}
+  .link-actions .tiny{display:flex!important;align-items:center;justify-content:center;width:100%;min-height:42px}
+  .admin-wrap{margin:18px auto;padding:0 12px}
+  .admin-title h1{font-size:36px;line-height:1.05;margin-top:8px}
+  .admin-stats{gap:9px}.admin-stats article{padding:14px}
+  .desktop-only{display:none!important}.mobile-only{display:grid!important}
+  .mobile-card-actions .tiny{display:inline-flex!important}
+  .pill{font-size:10px;padding:5px 8px}
+}

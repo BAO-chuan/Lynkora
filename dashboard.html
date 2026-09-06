@@ -1,9 +1,18 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=2"></head>
-<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost hidden" href="admin.html">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html">Tổng quan</a><a href="#create">Tạo link</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html">Admin</a></aside>
-<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.1</span><h1>Quản lý link</h1></div></div>
-<div class="stats"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article></div>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=3"></head>
+<body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=3">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
+<main class="dash"><aside><b>Publisher</b><a class="active" href="dashboard.html?v=3">Tổng quan</a><a href="#create">Tạo link</a><a href="#analytics">Thống kê</a><a href="#links">Link của tôi</a><a id="adminSide" class="hidden" href="admin.html?v=3">Admin</a></aside>
+<section class="dash-main"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.2</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+
+<div class="stats stats-four"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article></div>
+
+<div class="panel" id="analytics">
+  <div class="row-between"><div><h2>7 ngày gần nhất</h2><p class="muted compact">Lượt mở và lượt hợp lệ theo ngày.</p></div><span id="weekSummary" class="pill">0 lượt</span></div>
+  <div id="dailyChart" class="daily-chart"><p class="muted">Đang tải thống kê...</p></div>
+  <div class="chart-legend"><span><i class="legend-dot opens"></i>Lượt mở</span><span><i class="legend-dot valid"></i>Hợp lệ</span></div>
+</div>
+
 <div class="panel" id="create"><h2>Tạo link mới</h2><form id="shortenForm" class="shorten"><input id="targetUrl" type="url" required placeholder="https://example.com/..."><button class="primary" type="submit">Rút gọn</button></form><div id="createMsg" class="msg"></div></div>
-<div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
+
+<div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=2"></script><script src="app.js?v=2"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=3"></script><script src="app.js?v=3"></script></body></html>
