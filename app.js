@@ -636,8 +636,9 @@ async function loadRevenueCycles(){
 
 if($("usersBody")){
     loadAdmin();
+    loadRevenueCycles();
     $("adminLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
-    $("adminRefreshBtn").onclick=loadAdmin;
+    $("adminRefreshBtn").onclick=()=>Promise.all([loadAdmin(),loadRevenueCycles()]);
     
   if($("cycleForm")) $("cycleForm").onsubmit=async e=>{
     e.preventDefault();
@@ -701,7 +702,6 @@ if($("minWithdrawForm")) $("minWithdrawForm").onsubmit=async e=>{
 
         if($("minWithdrawMsg")) $("minWithdrawMsg").textContent="Đã cập nhật mức rút tối thiểu.";
         await loadAdmin();
-  await loadRevenueCycles();
       }catch(ex){
         if($("minWithdrawMsg")) $("minWithdrawMsg").textContent=errText(ex);
       }finally{
