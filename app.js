@@ -50,10 +50,10 @@
           const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:$("displayName").value.trim()}}});
           if(error) throw error;
           $("msg").textContent = data.session ? "Đăng ký thành công." : "Đăng ký thành công. Hãy xác nhận email rồi đăng nhập.";
-          if(data.session) location.href="dashboard.html?v=3";
+          if(data.session) location.href="dashboard.html?v=4";
         } else {
           const {error}=await sb.auth.signInWithPassword({email,password});
-          if(error) throw error; location.href="dashboard.html?v=3";
+          if(error) throw error; location.href="dashboard.html?v=4";
         }
       } catch(e2){$("msg").textContent=errText(e2)} finally {$("submitBtn").disabled=false}
     };
@@ -94,6 +94,14 @@
     renderDailyChart($("dailyChart"),data,$("weekSummary"));
   }
 
+  async function loadRevenue() {
+    if(!$("estimatedRevenue")) return;
+    const {data,error}=await sb.rpc("lynkora_my_revenue_summary");
+    if(error) return;
+    $("estimatedRevenue").textContent=`$${Number(data?.estimated_usd||0).toFixed(4)}`;
+    $("publisherCpm").textContent=`CPM $${Number(data?.cpm_usd||0).toFixed(2)}`;
+  }
+
   async function loadLinks() {
     const u=await requireUser(); if(!u) return;
     $("userEmail").textContent=u.email||"";
@@ -127,9 +135,9 @@
   }
 
   if ($("shortenForm")) {
-    Promise.all([loadLinks(),loadMyDaily()]);
+    Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
-    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily()])};
+    $("refreshBtn").onclick=async()=>{await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()])};
     $("shortenForm").onsubmit=async e=>{
       e.preventDefault(); $("createMsg").textContent="";
       const url=$("targetUrl").value.trim(), btn=$("shortenForm").querySelector("button");
@@ -138,7 +146,7 @@
         const {data,error}=await sb.rpc("lynkora_create_link",{p_target_url:url});
         if(error) throw error;
         $("createMsg").textContent=`Đã tạo: ${shortUrl(data)}`;
-        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily()]);
+        $("targetUrl").value=""; await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
       }catch(ex){$("createMsg").textContent=errText(ex)}
       finally{btn.disabled=false}
     };
@@ -159,7 +167,7 @@
           const {error}=await sb.rpc("lynkora_delete_my_link",{p_code:code});
           if(error) throw error;
         }
-        await Promise.all([loadLinks(),loadMyDaily()]);
+        await Promise.all([loadLinks(),loadMyDaily(),loadRevenue()]);
       }catch(ex){$("createMsg").textContent=errText(ex);btn.disabled=false}
     };
   }
@@ -209,18 +217,21 @@
     const u=await requireUser(); if(!u) return;
     $("adminEmail").textContent=u.email||"";
     const role=await myRole();
-    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=3";return}
-    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de}] = await Promise.all([
+    if(role!=="admin"){alert("Tài khoản này không có quyền Admin.");location.href="dashboard.html?v=4";return}
+    const [{data:stats,error:se},{data:users,error:ue},{data:links,error:le},{data:daily,error:de},{data:rev,error:re}] = await Promise.all([
       sb.rpc("lynkora_admin_stats"),
       sb.rpc("lynkora_admin_users"),
       sb.rpc("lynkora_admin_links"),
-      sb.rpc("lynkora_admin_daily_stats",{p_days:7})
+      sb.rpc("lynkora_admin_daily_stats",{p_days:7}),
+      sb.rpc("lynkora_admin_revenue_summary")
     ]);
-    if(se||ue||le||de){$("adminMsg").textContent=errText(se||ue||le||de);return}
+    if(se||ue||le||de||re){$("adminMsg").textContent=errText(se||ue||le||de||re);return}
     $("admUsers").textContent=stats?.users_count??0;
     $("admLinks").textContent=stats?.links_count??0;
     $("admClicks").textContent=stats?.clicks_count??0;
     $("admValid").textContent=stats?.valid_clicks_count??0;
+    if($("cpmInput")) $("cpmInput").value=Number(rev?.cpm_usd||0).toFixed(2);
+    if($("adminEstimatedRevenue")) $("adminEstimatedRevenue").textContent=`$${Number(rev?.estimated_usd||0).toFixed(4)}`;
     renderDailyChart($("adminDailyChart"),daily,$("adminWeekSummary"));
 
     $("usersBody").innerHTML=(users||[]).map(x=>`<tr><td>${esc(x.email)}</td><td>${esc(x.display_name||"—")}</td><td><span class="status ${x.role==="admin"?"on":"off"}">${esc(x.role)}</span></td><td>${Number(x.links_count||0)}</td><td>${Number(x.clicks_count||0)}</td><td>${Number(x.valid_clicks_count||0)}</td><td>${fmtDate(x.created_at)}</td></tr>`).join("")||'<tr><td colspan="7">Chưa có dữ liệu.</td></tr>';
@@ -252,6 +263,17 @@
     loadAdmin();
     $("adminLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
     $("adminRefreshBtn").onclick=loadAdmin;
+    if($("cpmForm")) $("cpmForm").onsubmit=async e=>{
+      e.preventDefault();
+      $("adminMsg").textContent="";
+      const value=Number($("cpmInput").value);
+      try{
+        const {error}=await sb.rpc("lynkora_admin_set_cpm",{p_cpm_usd:value});
+        if(error) throw error;
+        $("adminMsg").textContent="Đã lưu CPM.";
+        await loadAdmin();
+      }catch(ex){$("adminMsg").textContent=errText(ex)}
+    };
     $("adminLinksBody").onclick=handleAdminAction;
     $("adminLinksCards").onclick=handleAdminAction;
   }

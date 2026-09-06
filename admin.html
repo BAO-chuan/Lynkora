@@ -1,9 +1,10 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=3"></head>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Admin</title><link rel="stylesheet" href="styles.css?v=4"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a class="ghost mobile-keep" href="dashboard.html?v=3">Publisher</a><span id="adminEmail" class="muted"></span><button class="ghost" id="adminLogoutBtn">Đăng xuất</button></div></header>
 <main class="admin-wrap">
-  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.2</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
+  <div class="dash-title admin-title"><span class="eyebrow">LYNKORA ADMIN • v1.3</span><h1>Tổng quan hệ thống</h1><p class="muted">Quản lý người dùng và link, tối ưu hiển thị trên điện thoại.</p></div>
 
   <div class="stats admin-stats"><article><small>Người dùng</small><b id="admUsers">0</b></article><article><small>Tổng link</small><b id="admLinks">0</b></article><article><small>Lượt mở</small><b id="admClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="admValid">0</b></article></div>
+<div class="panel revenue-panel"><div class="row-between"><div><span class="eyebrow">REVENUE CONFIG</span><h2>Mức CPM nội bộ</h2><p class="muted compact">Dùng để ước tính doanh thu demo từ lượt hợp lệ. Không phải số tiền do mạng quảng cáo xác nhận.</p></div><form id="cpmForm" class="cpm-form"><label>USD / 1.000 lượt hợp lệ<input id="cpmInput" type="number" min="0" max="1000" step="0.01" required></label><button class="primary" type="submit">Lưu CPM</button></form></div><div class="revenue-admin"><span>Ước tính toàn hệ thống</span><b id="adminEstimatedRevenue">$0.0000</b></div></div>
 
   <div class="panel">
     <div class="row-between"><div><h2>Traffic 7 ngày</h2><p class="muted compact">Toàn hệ thống.</p></div><span id="adminWeekSummary" class="pill">0 lượt</span></div>
@@ -22,4 +23,4 @@
   </div>
   <div id="adminMsg" class="msg"></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=3"></script><script src="app.js?v=3"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=4"></script><script src="app.js?v=4"></script></body></html>

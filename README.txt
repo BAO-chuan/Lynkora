@@ -1,19 +1,17 @@
-LYNKORA v1.2 — MOBILE + ANALYTICS
+LYNKORA v1.3 — REVENUE ESTIMATE
 
-Cập nhật theo thứ tự:
-1) Supabase SQL Editor: chạy Lynkora-v1.2.sql.
-2) GitHub: ghi đè dashboard.html, admin.html, app.js, styles.css.
-3) config.js không bắt buộc upload lại nếu bản hiện tại đang chạy đúng.
-4) KHÔNG sửa index.html, auth.html, go.html.
-5) Test:
-   https://bao-chuan.github.io/Lynkora/dashboard.html?v=3
-   https://bao-chuan.github.io/Lynkora/admin.html?v=3
+Mục tiêu:
+- Thêm doanh thu ƯỚC TÍNH từ lượt hợp lệ.
+- Admin cấu hình CPM nội bộ.
+- Publisher chỉ xem số ước tính của chính mình.
+- Chưa có payout/rút tiền và chưa tích hợp mạng quảng cáo.
+- Không thay Auth, tạo link, countdown, redirect.
 
-Mới trong v1.2:
-- Tỷ lệ lượt hợp lệ.
-- Biểu đồ traffic 7 ngày.
-- Ngày tạo + tỷ lệ hợp lệ cho từng link.
-- Admin có biểu đồ 7 ngày.
-- Bảng Admin chuyển thành card trên mobile.
-- Nút Admin/Publisher vẫn hiện trên iPhone.
-- Không thay Auth, tạo link, countdown hay redirect đang chạy ổn.
+Cập nhật:
+1) Chạy Lynkora-v1.3.sql trong Supabase sau v1.2.
+2) GitHub ghi đè: dashboard.html, admin.html, app.js, styles.css.
+3) Không cần thay config.js/index.html/auth.html/go.html.
+4) Test dashboard.html?v=4 và admin.html?v=4.
+
+Mặc định CPM demo: $1.50 / 1.000 lượt hợp lệ.
+Admin có thể đổi CPM trong admin.html.

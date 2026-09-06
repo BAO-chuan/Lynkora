@@ -68,3 +68,10 @@
   .mobile-card-actions .tiny{display:inline-flex!important}
   .pill{font-size:10px;padding:5px 8px}
 }
+
+/* Lynkora v1.3 — Revenue estimate */
+.revenue-panel{border-color:#214a5b;background:linear-gradient(135deg,#081725,#0a1e2b)}
+.revenue-number{text-align:right;min-width:150px}.revenue-number small,.revenue-number span{display:block;color:var(--muted)}.revenue-number b{display:block;font-size:30px;margin:5px 0;color:#73f0c1}
+.cpm-form{display:flex;align-items:end;gap:10px}.cpm-form label{display:grid;gap:6px;color:var(--muted);font-size:12px}.cpm-form input{width:180px}
+.revenue-admin{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:15px;border-top:1px solid #1c3348}.revenue-admin b{font-size:26px;color:#73f0c1}
+@media(max-width:520px){.revenue-panel .row-between{display:grid}.revenue-number{text-align:left;margin-top:12px}.cpm-form{display:grid;width:100%;margin-top:12px}.cpm-form input{width:100%}.cpm-form .primary{display:flex!important;justify-content:center}.revenue-admin{gap:10px}.revenue-admin b{font-size:22px}}
