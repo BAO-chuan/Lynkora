@@ -1,7 +1,7 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lynkora — Dashboard</title><link rel="stylesheet" href="styles.css?v=19"></head>
 <body><header class="topbar"><a class="brand" href="index.html"><span class="logo">↗</span>Lynkora</a><div class="auth-actions"><a id="adminNav" class="ghost mobile-keep hidden" href="admin.html?v=17">Admin</a><span id="userEmail" class="muted"></span><button class="ghost" id="logoutBtn">Đăng xuất</button></div></header>
-<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
-<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.19</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
+<main class="dash"><aside class="lynkora-side-nav"><b>Publisher</b><button class="lynkora-nav active" type="button" data-view="overview">⌂ Tổng quan</button><button class="lynkora-nav" type="button" data-view="links">↗ Link của tôi</button><button class="lynkora-nav" type="button" data-view="analytics">▥ Thống kê</button><button class="lynkora-nav" type="button" data-view="earnings">₫ Thu nhập</button><button class="lynkora-nav" type="button" data-view="withdraw">⇄ Rút tiền</button><button class="lynkora-nav" type="button" data-view="account">⚙ Tài khoản</button><a id="adminSide" class="hidden" href="admin.html?v=17">Admin</a></aside>
+<section class="dash-main"><div class="lynkora-view active" data-view-panel="overview"><div class="dash-title"><div><span class="eyebrow">DASHBOARD • v1.19.1</span><h1>Quản lý link</h1><p class="muted compact">Theo dõi hiệu suất 7 ngày gần nhất và quản lý từng link.</p></div></div>
 
 <div class="stats stats-five"><article><small>Tổng link</small><b id="totalLinks">0</b></article><article><small>Tổng lượt mở</small><b id="totalClicks">0</b></article><article><small>Lượt hợp lệ</small><b id="validClicks">0</b></article><article><small>Tỷ lệ hợp lệ</small><b id="validRate">0%</b></article><article><small>Bị từ chối</small><b id="invalidClicks">0</b></article></div>
 <div class="panel"><span class="eyebrow">QUICK ACCESS • v1.19</span><h2>Chọn mục cần thao tác</h2><p class="muted compact">Dashboard đã được chia thành từng khu vực riêng. Dùng menu bên trái hoặc thanh điều hướng phía dưới trên điện thoại.</p></div></div>
@@ -103,6 +103,31 @@
 
 <div class="panel" id="links"><div class="row-between"><div><h2>Link của tôi</h2><p class="muted compact">Sao chép, mở, bật/tắt hoặc xóa link.</p></div><button id="refreshBtn" class="ghost mobile-keep">Làm mới</button></div><div id="linksList" class="link-list"><p class="muted">Đang tải...</p></div></div>
 </div>
+
+<div class="lynkora-view" data-view-panel="account">
+<div class="panel">
+  <div class="row-between"><div><span class="eyebrow">ACCOUNT • v1.19.1</span><h2>Tài khoản Publisher</h2><p class="muted compact">Quản lý thông tin cơ bản và bảo mật tài khoản Lynkora.</p></div><span id="accountRole" class="pill">Publisher</span></div>
+  <div class="wallet-mini wallet-mini-v110">
+    <span><small>Email</small><b id="accountEmail">—</b></span>
+    <span><small>Ngày tham gia</small><b id="accountCreatedAt">—</b></span>
+  </div>
+  <form id="accountProfileForm" class="payout-profile-form" style="margin-top:16px">
+    <label>Tên hiển thị<input id="accountDisplayName" type="text" minlength="2" maxlength="50" required placeholder="Tên hiển thị"></label>
+    <button class="primary" type="submit">Lưu tên hiển thị</button>
+  </form>
+  <div id="accountProfileMsg" class="msg"></div>
+</div>
+<div class="panel">
+  <span class="eyebrow">SECURITY</span><h2>Đổi mật khẩu</h2><p class="muted compact">Mật khẩu mới cần ít nhất 8 ký tự. Không chia sẻ mật khẩu hoặc mã xác minh cho người khác.</p>
+  <form id="accountPasswordForm" class="payout-profile-form">
+    <label>Mật khẩu mới<input id="accountNewPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Ít nhất 8 ký tự"></label>
+    <label>Nhập lại mật khẩu<input id="accountConfirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Nhập lại mật khẩu"></label>
+    <button class="primary" type="submit">Đổi mật khẩu</button>
+  </form>
+  <div id="accountPasswordMsg" class="msg"></div>
+</div>
+<div class="panel"><h2>Phiên đăng nhập</h2><p class="muted compact">Đăng xuất khỏi phiên hiện tại trên thiết bị này.</p><button id="accountLogoutBtn" class="ghost" type="button">Đăng xuất</button></div>
+</div>
 </section></main>
 
 <style>
@@ -113,8 +138,8 @@
 @media(max-width:800px){
   body{padding-bottom:78px}
   .lynkora-side-nav{display:none!important}
-  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
-  .lynkora-bottom-nav button{min-width:0;border:0;background:transparent;color:#8d9ab0;border-radius:13px;padding:7px 2px 6px;font-size:9px;font-weight:700;line-height:1.15}
+  .lynkora-bottom-nav{position:fixed;z-index:999;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:6px;border:1px solid rgba(120,170,255,.18);border-radius:18px;background:rgba(6,13,28,.94);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(0,0,0,.38)}
+  .lynkora-bottom-nav button{min-width:0;border:0;background:transparent;color:#8d9ab0;border-radius:13px;padding:7px 2px 6px;font-size:8px;font-weight:700;line-height:1.15}
   .lynkora-bottom-nav button span{display:block;font-size:18px;line-height:22px;margin-bottom:2px}
   .lynkora-bottom-nav button.active{background:rgba(55,145,255,.14);color:#8fc7ff}
   .dash-main{padding-bottom:14px}
@@ -126,10 +151,11 @@
   <button type="button" data-view="analytics"><span>▥</span>Thống kê</button>
   <button type="button" data-view="earnings"><span>₫</span>Thu nhập</button>
   <button type="button" data-view="withdraw"><span>⇄</span>Rút tiền</button>
+  <button type="button" data-view="account"><span>⚙</span>Tài khoản</button>
 </nav>
 <script>
 (()=>{
-  const validViews=new Set(["overview","links","analytics","earnings","withdraw"]);
+  const validViews=new Set(["overview","links","analytics","earnings","withdraw","account"]);
   const buttons=[...document.querySelectorAll("[data-view]")];
   const panels=[...document.querySelectorAll("[data-view-panel]")];
   function showView(name,updateHash=true){
@@ -145,4 +171,4 @@
   window.addEventListener("hashchange",()=>showView(location.hash.slice(1),false));
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=20"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=19"></script><script src="app.js?v=21"></script></body></html>

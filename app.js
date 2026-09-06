@@ -326,6 +326,20 @@
     </article>`).join("")||'<p class="muted">Chưa có yêu cầu rút.</p>';
   }
 
+  async function loadAccount() {
+    if(!$('accountProfileForm')) return;
+    const u=await requireUser(); if(!u) return;
+    if($('accountEmail')) $('accountEmail').textContent=u.email||'—';
+    if($('accountCreatedAt')) $('accountCreatedAt').textContent=fmtDate(u.created_at);
+    const {data,error}=await sb.rpc('lynkora_my_account_profile');
+    if(error){
+      if($('accountProfileMsg')) $('accountProfileMsg').textContent=errText(error);
+      return;
+    }
+    if($('accountDisplayName')) $('accountDisplayName').value=data?.display_name||'';
+    if($('accountRole')) $('accountRole').textContent=(data?.role||'publisher').toUpperCase();
+  }
+
   async function loadLinks() {
     const u=await requireUser(); if(!u) return;
     $("userEmail").textContent=u.email||"";
@@ -363,6 +377,39 @@
     Promise.all([loadLinks(),loadMyDaily(),loadLinkAnalytics(),loadWallet(),loadPendingEarnings(),loadPublisherModel(),loadWithdrawals(),loadPayoutProfile()]);
     if($("linkAnalyticsSelect")) $("linkAnalyticsSelect").onchange=()=>loadLinkDaily($("linkAnalyticsSelect").value);
     $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
+    if($("accountLogoutBtn")) $("accountLogoutBtn").onclick=async()=>{await sb.auth.signOut();location.href="index.html"};
+
+    if($("accountProfileForm")) $("accountProfileForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("accountProfileForm").querySelector("button[type='submit']");
+      const name=$("accountDisplayName").value.trim();
+      btn.disabled=true;
+      $("accountProfileMsg").textContent="Đang lưu...";
+      try{
+        const {error}=await sb.rpc("lynkora_save_my_display_name",{p_display_name:name});
+        if(error) throw error;
+        $("accountProfileMsg").textContent="Đã cập nhật tên hiển thị.";
+      }catch(ex){$("accountProfileMsg").textContent=errText(ex)}
+      finally{btn.disabled=false}
+    };
+
+    if($("accountPasswordForm")) $("accountPasswordForm").onsubmit=async e=>{
+      e.preventDefault();
+      const btn=$("accountPasswordForm").querySelector("button[type='submit']");
+      const pass=$("accountNewPassword").value;
+      const confirmPass=$("accountConfirmPassword").value;
+      if(pass.length<8){$("accountPasswordMsg").textContent="Mật khẩu cần ít nhất 8 ký tự.";return}
+      if(pass!==confirmPass){$("accountPasswordMsg").textContent="Hai mật khẩu chưa khớp.";return}
+      btn.disabled=true;
+      $("accountPasswordMsg").textContent="Đang cập nhật...";
+      try{
+        const {error}=await sb.auth.updateUser({password:pass});
+        if(error) throw error;
+        $("accountPasswordMsg").textContent="Đổi mật khẩu thành công.";
+        $("accountPasswordForm").reset();
+      }catch(ex){$("accountPasswordMsg").textContent=errText(ex)}
+      finally{btn.disabled=false}
+    };
 
     if ($("payoutProfileForm")) $("payoutProfileForm").onsubmit=async e=>{
       e.preventDefault();
